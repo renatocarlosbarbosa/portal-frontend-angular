@@ -1,0 +1,246 @@
+<section class="finance-page" aria-labelledby="finance-title">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Financeiro</span>
+      <h1 id="finance-title">Analise financeira</h1>
+    </div>
+
+    <div class="filter-area">
+      <form class="filters" [formGroup]="filtros">
+        <label for="finance-start">
+          <span>Inicio</span>
+          <input id="finance-start" type="date" formControlName="dataInicial" />
+        </label>
+        <label for="finance-end">
+          <span>Fim</span>
+          <input id="finance-end" type="date" formControlName="dataFinal" />
+        </label>
+        <label for="finance-store">
+          <span>Loja</span>
+          <select id="finance-store" formControlName="sapLoja">
+            <option value="">Todas</option>
+            @for (loja of lojas; track loja) {
+              <option [value]="loja">{{ loja }}</option>
+            }
+          </select>
+        </label>
+      </form>
+      <div class="quick-actions" aria-label="Atalhos de periodo">
+        <button type="button" (click)="aplicarMesAtual()">Mes atual</button>
+        <button type="button" (click)="aplicarUltimos30Dias()">Ultimos 30 dias</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="summary-grid" aria-label="Resumo financeiro">
+    <article>
+      <small>Entradas</small>
+      <strong>{{ formatarMoeda(entradasPeriodo()) }}</strong>
+    </article>
+    <article>
+      <small>Saidas</small>
+      <strong>{{ formatarMoeda(saidasPeriodo()) }}</strong>
+    </article>
+    <article>
+      <small>Saldo</small>
+      <strong [class]="tipoValorClasse(saldoPeriodo())">{{ formatarMoeda(saldoPeriodo()) }}</strong>
+    </article>
+    <article>
+      <small>Previsto</small>
+      <strong [class]="tipoValorClasse(totalPrevisto())">{{ formatarMoeda(totalPrevisto()) }}</strong>
+    </article>
+    <article>
+      <small>Realizado</small>
+      <strong [class]="tipoValorClasse(totalRealizado())">{{ formatarMoeda(totalRealizado()) }}</strong>
+    </article>
+    <article>
+      <small>Contas</small>
+      <strong>{{ contasReceber().length }} / {{ contasPagar().length }}</strong>
+    </article>
+    <article>
+      <small>Extratos</small>
+      <strong>{{ painel().extratos.length }}</strong>
+    </article>
+    <article>
+      <small>Cartoes liquido</small>
+      <strong>{{ formatarMoeda(cartoesLiquido()) }}</strong>
+    </article>
+  </section>
+
+  <nav class="tabs" aria-label="Consultas financeiras">
+    @for (aba of abas; track aba.id) {
+      <button
+        type="button"
+        [class.tab--active]="abaAtiva() === aba.id"
+        (click)="selecionarAba(aba.id)"
+      >
+        <span>{{ aba.label }}</span>
+        <strong>{{ aba.contador() }}</strong>
+      </button>
+    }
+  </nav>
+
+  <section class="panel">
+    @if (carregando()) {
+      <p class="state-message">Carregando dados financeiros...</p>
+    } @else if (erroCarregamento()) {
+      <p class="state-message state-message--error" role="alert">
+        Nao foi possivel carregar as consultas financeiras.
+      </p>
+    } @else {
+      @switch (abaAtiva()) {
+        @case ('fluxo') {
+          <div class="table-wrap">
+            <table>
+              <caption>Fluxo de caixa por origem</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Data</th>
+                  <th scope="col">Loja</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col" class="money-column">Entradas</th>
+                  <th scope="col" class="money-column">Saidas</th>
+                  <th scope="col" class="money-column">Saldo</th>
+                  <th scope="col" class="money-column">Acumulado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linha of painel().fluxo; track trackFluxo($index, linha)) {
+                  <tr>
+                    <td>{{ formatarData(linha.dataEvento) }}</td>
+                    <td>{{ linha.sapLoja ?? '-' }}</td>
+                    <td><span class="pill">{{ linha.tipoEvento }}</span></td>
+                    <td class="money-column">{{ formatarMoeda(linha.entradas) }}</td>
+                    <td class="money-column">{{ formatarMoeda(linha.saidas) }}</td>
+                    <td class="money-column" [class]="tipoValorClasse(linha.saldoDia)">
+                      {{ formatarMoeda(linha.saldoDia) }}
+                    </td>
+                    <td class="money-column" [class]="tipoValorClasse(linha.saldoAcumulado)">
+                      {{ formatarMoeda(linha.saldoAcumulado) }}
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Nenhum fluxo encontrado no periodo.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @case ('contas') {
+          <div class="table-wrap">
+            <table>
+              <caption>Contas financeiras originadas no CISS</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Vencimento</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Loja</th>
+                  <th scope="col">Forma</th>
+                  <th scope="col">Cartao</th>
+                  <th scope="col" class="money-column">Valor</th>
+                  <th scope="col">Origem</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (conta of painel().contas; track trackOrigem($index, conta)) {
+                  <tr>
+                    <td>{{ formatarData(conta.dataVencimento) }}</td>
+                    <td><span class="pill">{{ conta.tipoTitulo }}</span></td>
+                    <td>{{ conta.sapLoja }}</td>
+                    <td>{{ conta.descricaoFormaPagamento ?? '-' }}</td>
+                    <td>{{ conta.bandeiraCartao ?? conta.operadoraCartao ?? '-' }}</td>
+                    <td class="money-column">{{ formatarMoeda(conta.valorParcela) }}</td>
+                    <td class="origin-cell">{{ nomeFonte(conta.origemTabela) }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Nenhuma conta encontrada no periodo.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @case ('extrato') {
+          <div class="table-wrap">
+            <table>
+              <caption>Extrato bancario importado</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Data</th>
+                  <th scope="col">Loja</th>
+                  <th scope="col">Banco</th>
+                  <th scope="col">Conta</th>
+                  <th scope="col">Historico</th>
+                  <th scope="col" class="money-column">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (extrato of painel().extratos; track trackOrigem($index, extrato)) {
+                  <tr>
+                    <td>{{ formatarData(extrato.dataTransacao) }}</td>
+                    <td>{{ extrato.sapLoja }}</td>
+                    <td>{{ extrato.numeroBanco ?? '-' }}</td>
+                    <td>{{ extrato.numeroConta ?? '-' }}</td>
+                    <td class="description-cell">{{ extrato.historicoTransacao ?? '-' }}</td>
+                    <td class="money-column" [class]="tipoValorClasse(extrato.valorTransacao)">
+                      {{ formatarMoeda(extrato.valorTransacao) }}
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="empty-cell">Nenhum extrato encontrado no periodo.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @case ('cartoes') {
+          <div class="table-wrap">
+            <table>
+              <caption>Vendas e recebimentos de cartao</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Venda</th>
+                  <th scope="col">Fonte</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Modalidade</th>
+                  <th scope="col">Bandeira</th>
+                  <th scope="col">NSU</th>
+                  <th scope="col" class="money-column">Bruto</th>
+                  <th scope="col" class="money-column">Taxa</th>
+                  <th scope="col" class="money-column">Liquido</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cartao of painel().cartoes; track trackOrigem($index, cartao)) {
+                  <tr>
+                    <td>{{ formatarData(cartao.dataVenda) }}</td>
+                    <td class="origin-cell">{{ nomeFonte(cartao.origemTabela) }}</td>
+                    <td>{{ cartao.statusOrigem ?? '-' }}</td>
+                    <td>{{ cartao.modalidade ?? cartao.tipo ?? '-' }}</td>
+                    <td>{{ cartao.bandeira ?? '-' }}</td>
+                    <td>{{ cartao.nsuCv ?? '-' }}</td>
+                    <td class="money-column">{{ formatarMoeda(cartao.valorBruto) }}</td>
+                    <td class="money-column">{{ formatarMoeda(cartao.valorMdr) }}</td>
+                    <td class="money-column">{{ formatarMoeda(cartao.valorLiquido) }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="9" class="empty-cell">Nenhuma informacao de cartao encontrada no periodo.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </section>
+</section>

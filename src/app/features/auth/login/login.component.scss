@@ -1,0 +1,141 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 18%, rgb(0 113 227 / 18%), transparent 22rem),
+    radial-gradient(circle at 82% 20%, rgb(175 82 222 / 14%), transparent 24rem),
+    linear-gradient(180deg, #fbfbfd 0%, var(--color-background) 100%);
+}
+
+.panel {
+  width: min(100%, 440px);
+  padding: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: rgb(255 255 255 / 78%);
+  backdrop-filter: var(--blur-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.identity__mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 16px;
+  background: #1b0d07;
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgb(91 36 10 / 22%);
+  overflow: hidden;
+}
+
+.identity__mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.identity strong,
+.identity span {
+  display: block;
+}
+
+.identity span,
+.heading p {
+  color: var(--color-text-muted);
+}
+
+.heading {
+  margin-bottom: 28px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+}
+
+label {
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 82%);
+  color: var(--color-text);
+}
+
+input:focus-visible {
+  border-color: var(--color-primary);
+  outline: 3px solid rgb(0 113 227 / 22%);
+}
+
+.error,
+.form-error {
+  color: var(--color-danger);
+}
+
+.form-error {
+  margin-top: 8px;
+}
+
+button {
+  min-height: 46px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: linear-gradient(180deg, #0a84ff, var(--color-primary));
+  color: #ffffff;
+  box-shadow: 0 14px 26px rgb(0 113 227 / 22%);
+  font-weight: 800;
+}
+
+button:hover,
+button:focus-visible {
+  background: var(--color-primary-dark);
+  outline: 3px solid rgb(0 113 227 / 22%);
+}
+
+button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+@media (max-width: 520px) {
+  .login-page {
+    padding: 16px;
+  }
+
+  .panel {
+    padding: 24px;
+  }
+}

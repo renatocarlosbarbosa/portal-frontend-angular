@@ -1,0 +1,86 @@
+<section class="dashboard" aria-labelledby="dashboard-title">
+  <div class="headline">
+    <div>
+      <span class="eyebrow">Vendas essenciais</span>
+      <h1 id="dashboard-title">Indicadores diarios por loja</h1>
+      <p>{{ periodoResumo() }}</p>
+    </div>
+    <div class="header-actions">
+      <span class="counter">{{ totalDias() }} dias</span>
+      <span class="counter">{{ totalLojas() }} lojas</span>
+      <button type="button" class="secondary-action" (click)="alternarTodos()">
+        {{ todosExpandidos() ? 'Recolher todos' : 'Expandir todos' }}
+      </button>
+    </div>
+  </div>
+
+  <section class="sales-panel" aria-label="Indicadores essenciais de vendas">
+    @if (carregando()) {
+      <p class="state-message">Carregando indicadores atualizados...</p>
+    } @else if (erroCarregamento()) {
+      <p class="state-message state-message--error" role="alert">
+        Nao foi possivel carregar os indicadores de vendas agora.
+      </p>
+    } @else if (resumoPorDia().length === 0) {
+      <p class="state-message">Nenhum indicador encontrado para o periodo.</p>
+    }
+
+    @for (dia of resumoPorDia(); track dia.data) {
+      <article class="day-card">
+        <button
+          type="button"
+          class="day-card__summary"
+          [attr.aria-expanded]="diaEstaExpandido(dia.data)"
+          [attr.aria-controls]="'lojas-' + dia.data"
+          (click)="alternarDia(dia.data)"
+        >
+          <span class="day-card__date">
+            <strong>{{ dia.dataLabel }}</strong>
+            <small>{{ dia.lojas.length }} lojas</small>
+          </span>
+
+          <span class="day-card__totals">
+            @for (indicador of dia.totalizadores; track indicador.label) {
+              <span class="total-item">
+                <small>{{ indicador.label }}</small>
+                <strong>{{ indicador.value }}</strong>
+              </span>
+            }
+          </span>
+
+          <span class="collapse-icon" aria-hidden="true">
+            {{ diaEstaExpandido(dia.data) ? '−' : '+' }}
+          </span>
+        </button>
+
+        @if (diaEstaExpandido(dia.data)) {
+          <div class="store-table-wrap" [id]="'lojas-' + dia.data">
+            <table>
+              <caption>
+                Indicadores por loja em {{ dia.dataLabel }}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="sticky-column">sap_loja</th>
+                  @for (indicador of dia.lojas[0]?.indicadores ?? []; track indicador.label) {
+                    <th scope="col">{{ indicador.label }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (loja of dia.lojas; track loja.sapLoja) {
+                  <tr>
+                    <th scope="row" class="sticky-column">{{ loja.sapLoja }}</th>
+                    @for (indicador of loja.indicadores; track indicador.label) {
+                      <td>{{ indicador.value }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </article>
+    }
+  </section>
+</section>

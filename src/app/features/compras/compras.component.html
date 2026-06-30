@@ -1,0 +1,663 @@
+<section class="compras-page" aria-labelledby="compras-title">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Compras operacionais</span>
+      <h1 id="compras-title">Organizacao de Compras</h1>
+    </div>
+
+    <form class="filters" [formGroup]="filtros">
+      <label>
+        <span>Loja</span>
+        <select formControlName="sapLoja">
+          <option value="">Todas</option>
+          @for (loja of lojas; track loja) {
+            <option [value]="loja">{{ loja }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Local</span>
+        <select formControlName="localCompraId">
+          <option value="">Todos</option>
+          @for (local of painel().locais; track trackId($index, local)) {
+            <option [value]="local.id">{{ local.nome }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Fornecedor</span>
+        <select formControlName="fornecedorId">
+          <option value="">Todos</option>
+          @for (fornecedor of painel().fornecedores; track trackId($index, fornecedor)) {
+            <option [value]="fornecedor.id">{{ fornecedor.nome }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Grupo</span>
+        <select formControlName="grupoId">
+          <option value="">Todos</option>
+          @for (grupo of painel().grupos; track trackId($index, grupo)) {
+            <option [value]="grupo.id">{{ grupo.nome }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Status</span>
+        <select formControlName="status">
+          <option value="">Todos</option>
+          @for (status of statusNecessidade; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Prioridade</span>
+        <select formControlName="prioridade">
+          <option value="">Todas</option>
+          @for (prioridade of prioridades; track prioridade) {
+            <option [value]="prioridade">{{ prioridade }}</option>
+          }
+        </select>
+      </label>
+    </form>
+  </header>
+
+  <section class="summary-grid" aria-label="Resumo de compras">
+    <article>
+      <small>Pendentes</small>
+      <strong>{{ totalPendente() }}</strong>
+    </article>
+    <article>
+      <small>Consolidados</small>
+      <strong>{{ painel().organizacao.length }}</strong>
+    </article>
+    <article>
+      <small>Selecionados</small>
+      <strong>{{ totalSelecionado() }}</strong>
+    </article>
+    <article>
+      <small>Pedidos</small>
+      <strong>{{ painel().pedidos.length }}</strong>
+    </article>
+    <article>
+      <small>Valor aberto</small>
+      <strong>{{ formatarMoeda(valorPedidosAbertos()) }}</strong>
+    </article>
+    <article>
+      <small>Itens cadastrados</small>
+      <strong>{{ painel().itens.length }}</strong>
+    </article>
+  </section>
+
+  @if (erro()) {
+    <p class="state-message state-message--error" role="alert">{{ erro() }}</p>
+  }
+  @if (sucesso()) {
+    <p class="state-message state-message--success">{{ sucesso() }}</p>
+  }
+
+  <nav class="tabs" aria-label="Compras">
+    @for (aba of abas; track aba.id) {
+      <button
+        type="button"
+        [class.tab--active]="abaAtiva() === aba.id"
+        (click)="selecionarAba(aba.id)"
+      >
+        <span>{{ aba.label }}</span>
+        <strong>{{ aba.contador() }}</strong>
+      </button>
+    }
+  </nav>
+
+  <section class="panel">
+    @if (carregando()) {
+      <p class="state-message">Carregando compras...</p>
+    } @else {
+      @switch (abaAtiva()) {
+        @case ('organizacao') {
+          <div class="action-bar">
+            <div>
+              <strong>{{ totalSelecionado() }} necessidades selecionadas</strong>
+              <span>Selecione itens pendentes do mesmo local para gerar um pedido.</span>
+            </div>
+            <form class="inline-form" [formGroup]="pedidoForm">
+              <input type="text" formControlName="usuarioResponsavel" placeholder="Responsavel" />
+              <input type="text" formControlName="observacoes" placeholder="Observacoes do pedido" />
+              <button type="button" [disabled]="salvando() || totalSelecionado() === 0" (click)="gerarPedido()">
+                Gerar pedido
+              </button>
+            </form>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <caption>Necessidades consolidadas por local de compra</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Local</th>
+                  <th scope="col">Fornecedor</th>
+                  <th scope="col">Item</th>
+                  <th scope="col">Grupo</th>
+                  <th scope="col">Lojas</th>
+                  <th scope="col" class="number-column">Total</th>
+                  <th scope="col">Acao</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linha of painel().organizacao; track trackConsolidado($index, linha)) {
+                  <tr>
+                    <td>{{ linha.localCompraNome ?? '-' }}</td>
+                    <td>{{ linha.fornecedorNome ?? '-' }}</td>
+                    <td class="description-cell">{{ linha.itemDescricao }}</td>
+                    <td>{{ linha.grupoNome }}</td>
+                    <td>{{ linha.lojas ?? '-' }}</td>
+                    <td class="number-column">{{ formatarQuantidade(linha.quantidadeTotal, linha.unidadeSigla) }}</td>
+                    <td>
+                      <button type="button" class="small-button" (click)="selecionarConsolidado(linha)">
+                        Selecionar
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Nenhuma necessidade pendente consolidada.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @case ('lista') {
+          <div class="split-layout">
+            <aside class="side-list" aria-label="Pedidos de compra">
+              <div class="side-list__header">
+                <h2>Pedidos</h2>
+                <span>{{ painel().pedidos.length }}</span>
+              </div>
+              @for (pedido of painel().pedidos; track trackId($index, pedido)) {
+                <button
+                  type="button"
+                  [class.side-list__item--active]="pedidoSelecionado()?.pedido?.id === pedido.id"
+                  (click)="abrirPedido(pedido)"
+                >
+                  <span class="side-list__meta">{{ pedido.status }}</span>
+                  <strong>{{ pedido.numeroInterno }}</strong>
+                  <span>{{ pedido.localCompraNome }}</span>
+                  <small>{{ formatarMoeda(pedido.valorTotal) }}</small>
+                </button>
+              } @empty {
+                <p class="empty-card">Nenhum pedido encontrado.</p>
+              }
+            </aside>
+
+            <section class="shopping-list">
+              @if (pedidoSelecionado(); as detalhe) {
+                <header class="shopping-header">
+                  <div>
+                    <span class="eyebrow">Lista de compra</span>
+                    <h2>{{ detalhe.pedido.localCompraNome }}</h2>
+                    <p>{{ detalhe.pedido.fornecedorNome ?? 'Sem fornecedor vinculado' }}</p>
+                  </div>
+                  <div class="shopping-actions">
+                    <span class="pill">{{ detalhe.pedido.status }}</span>
+                    <button type="button" (click)="iniciarCompra()" [disabled]="detalhe.pedido.status !== 'ABERTO'">
+                      Em compra
+                    </button>
+                    <button type="button" (click)="finalizarPedido()" [disabled]="detalhe.pedido.status === 'FINALIZADO'">
+                      Finalizar
+                    </button>
+                    <button type="button" class="danger-button" (click)="cancelarPedido(detalhe.pedido)">
+                      Cancelar
+                    </button>
+                  </div>
+                </header>
+
+                <div class="shopping-progress">
+                  <div>
+                    <strong>{{ itensCompradosPedido() }} / {{ detalhe.itens.length }}</strong>
+                    <span>itens marcados como comprados</span>
+                  </div>
+                  <span>{{ formatarMoeda(detalhe.pedido.valorTotal) }}</span>
+                </div>
+
+                <div class="shopping-items">
+                  @for (item of detalhe.itens; track trackId($index, item)) {
+                    <article class="shopping-item" [class.shopping-item--done]="item.status === 'COMPRADO'">
+                      <div class="shopping-item__main">
+                        <div>
+                          <span class="shopping-item__status">{{ item.status }}</span>
+                          <strong>{{ item.itemDescricao }}</strong>
+                        </div>
+                        <span class="shopping-item__quantity">
+                          {{ formatarQuantidade(item.quantidadeSolicitada, item.unidadeSigla) }}
+                        </span>
+                      </div>
+
+                      <ul class="store-chips" aria-label="Lojas que originaram o item">
+                        @for (origem of item.origens; track origem.necessidadeId) {
+                          <li>
+                            <span>{{ origem.sapLoja }}</span>
+                            <strong>{{ formatarQuantidade(origem.quantidadeOrigem, item.unidadeSigla) }}</strong>
+                          </li>
+                        }
+                      </ul>
+
+                      <div class="shopping-inputs">
+                        <label>
+                          <span>Qtd comprada</span>
+                          <input #qtdComprada type="number" min="0" step="0.001" [value]="item.quantidadeComprada || item.quantidadeSolicitada" />
+                        </label>
+                        <label>
+                          <span>Valor unitario</span>
+                          <input #valorUnitario type="number" min="0" step="0.01" [value]="item.valorUnitario" />
+                        </label>
+                        <button
+                          type="button"
+                          class="shopping-item__action"
+                          (click)="marcarItemComprado(item, qtdComprada.value, valorUnitario.value)"
+                        >
+                          {{ item.status === 'COMPRADO' ? 'Atualizar compra' : 'Marcar comprado' }}
+                        </button>
+                      </div>
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="state-message">Selecione um pedido para abrir a lista de compra.</p>
+              }
+            </section>
+          </div>
+        }
+
+        @case ('necessidades') {
+          <div class="form-grid">
+            <form class="form-panel" [formGroup]="necessidadeForm" (ngSubmit)="criarNecessidade()">
+              <h2>Lancar necessidade</h2>
+              <label>
+                <span>Loja</span>
+                <select formControlName="sapLoja">
+                  @for (loja of lojas; track loja) {
+                    <option [value]="loja">{{ loja }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Item</span>
+                <select formControlName="itemCompraId">
+                  <option value="">Selecione</option>
+                  @for (item of painel().itens; track trackId($index, item)) {
+                    <option [value]="item.id">{{ item.descricao }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Quantidade</span>
+                <input type="number" min="0.001" step="0.001" formControlName="quantidadeNecessaria" />
+              </label>
+              <label>
+                <span>Prioridade</span>
+                <select formControlName="prioridade">
+                  @for (prioridade of prioridades; track prioridade) {
+                    <option [value]="prioridade">{{ prioridade }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Data</span>
+                <input type="date" formControlName="dataNecessidade" />
+              </label>
+              <label>
+                <span>Responsavel</span>
+                <input type="text" formControlName="usuarioResponsavel" />
+              </label>
+              <label class="wide-field">
+                <span>Observacao</span>
+                <textarea rows="2" formControlName="observacao"></textarea>
+              </label>
+              <button type="submit" [disabled]="necessidadeForm.invalid || salvando()">Registrar</button>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <caption>Necessidades por loja</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Selecionar</th>
+                    <th scope="col">Loja</th>
+                    <th scope="col">Item</th>
+                    <th scope="col">Local</th>
+                    <th scope="col">Prioridade</th>
+                    <th scope="col" class="number-column">Qtd</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Acao</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (necessidade of painel().necessidades; track trackId($index, necessidade)) {
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          [checked]="necessidadeSelecionada(necessidade.id)"
+                          [disabled]="necessidade.status !== 'PENDENTE'"
+                          (change)="alternarNecessidade(necessidade, $any($event.target).checked)"
+                        />
+                      </td>
+                      <td>{{ necessidade.sapLoja }}</td>
+                      <td class="description-cell">{{ necessidade.itemDescricao }}</td>
+                      <td>{{ necessidade.localCompraNome ?? '-' }}</td>
+                      <td><span class="pill">{{ necessidade.prioridade }}</span></td>
+                      <td class="number-column">{{ formatarQuantidade(necessidade.quantidadeNecessaria, necessidade.unidadeSigla) }}</td>
+                      <td>{{ necessidade.status }}</td>
+                      <td>
+                        @if (necessidade.status === 'CANCELADO') {
+                          <button type="button" class="small-button" (click)="reabrirNecessidade(necessidade)">Reabrir</button>
+                        } @else if (necessidade.status === 'PENDENTE') {
+                          <button type="button" class="small-button danger-button" (click)="cancelarNecessidade(necessidade)">Cancelar</button>
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="8" class="empty-cell">Nenhuma necessidade encontrada.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        @case ('itens') {
+          <div class="form-grid">
+            <form class="form-panel" [formGroup]="itemForm" (ngSubmit)="salvarItem()">
+              <h2>{{ itemEmEdicao() ? 'Editar item' : 'Cadastrar item' }}</h2>
+              <label class="wide-field">
+                <span>Descricao</span>
+                <input type="text" formControlName="descricao" />
+              </label>
+              <label>
+                <span>Grupo</span>
+                <select formControlName="grupoId">
+                  <option value="">Selecione</option>
+                  @for (grupo of painel().grupos; track trackId($index, grupo)) {
+                    <option [value]="grupo.id">{{ grupo.nome }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Unidade</span>
+                <select formControlName="unidadeMedidaId">
+                  <option value="">Selecione</option>
+                  @for (unidade of painel().unidades; track trackId($index, unidade)) {
+                    <option [value]="unidade.id">{{ unidade.sigla }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Local padrao</span>
+                <select formControlName="localCompraPadraoId">
+                  <option value="">Sem local</option>
+                  @for (local of painel().locais; track trackId($index, local)) {
+                    <option [value]="local.id">{{ local.nome }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Fornecedor padrao</span>
+                <select formControlName="fornecedorPadraoId">
+                  <option value="">Sem fornecedor</option>
+                  @for (fornecedor of painel().fornecedores; track trackId($index, fornecedor)) {
+                    <option [value]="fornecedor.id">{{ fornecedor.nome }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Minimo sugerido</span>
+                <input type="number" min="0" step="0.001" formControlName="quantidadeMinimaSugerida" />
+              </label>
+              <label>
+                <span>Qtd padrao</span>
+                <input type="number" min="0.001" step="0.001" formControlName="quantidadePadraoCompra" />
+              </label>
+              <label class="check-field">
+                <input type="checkbox" formControlName="recorrente" />
+                <span>Recorrente</span>
+              </label>
+              <label class="check-field">
+                <input type="checkbox" formControlName="homologado" />
+                <span>Homologado</span>
+              </label>
+              <label class="wide-field">
+                <span>Observacoes</span>
+                <textarea rows="2" formControlName="observacoes"></textarea>
+              </label>
+              <div class="button-row">
+                <button type="submit" [disabled]="itemForm.invalid || salvando()">
+                  {{ itemEmEdicao() ? 'Salvar item' : 'Cadastrar item' }}
+                </button>
+                @if (itemEmEdicao()) {
+                  <button type="button" class="neutral-button" (click)="cancelarEdicaoItem()">Cancelar</button>
+                }
+              </div>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <caption>Itens de compra</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Grupo</th>
+                    <th scope="col">Unidade</th>
+                    <th scope="col">Local</th>
+                    <th scope="col">Fornecedor</th>
+                    <th scope="col">Flags</th>
+                    <th scope="col">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of painel().itens; track trackId($index, item)) {
+                    <tr>
+                      <td class="description-cell">{{ item.descricao }}</td>
+                      <td>{{ item.grupoNome }}</td>
+                      <td>{{ item.unidadeSigla }}</td>
+                      <td>{{ item.localCompraPadraoNome ?? '-' }}</td>
+                      <td>{{ item.fornecedorPadraoNome ?? '-' }}</td>
+                      <td>{{ item.recorrente ? 'Recorrente' : 'Eventual' }} | {{ item.homologado ? 'Homologado' : 'Livre' }}</td>
+                      <td class="actions-cell">
+                        <button type="button" class="icon-button" title="Editar" aria-label="Editar item" (click)="editarItem(item)">&#9998;</button>
+                        <button type="button" class="icon-button neutral-button" title="Inativar" aria-label="Inativar item" (click)="desativarItem(item)">&#9675;</button>
+                        <button type="button" class="icon-button danger-button" title="Excluir" aria-label="Excluir item" (click)="excluirItem(item)">&#215;</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        @case ('grupos') {
+          <div class="form-grid">
+            <form class="form-panel" [formGroup]="grupoForm" (ngSubmit)="salvarGrupo()">
+              <h2>{{ grupoEmEdicao() ? 'Editar grupo' : 'Cadastrar grupo' }}</h2>
+              <label>
+                <span>Nome</span>
+                <input type="text" formControlName="nome" />
+              </label>
+              <label class="wide-field">
+                <span>Descricao</span>
+                <textarea rows="2" formControlName="descricao"></textarea>
+              </label>
+              <div class="button-row">
+                <button type="submit" [disabled]="grupoForm.invalid || salvando()">
+                  {{ grupoEmEdicao() ? 'Salvar grupo' : 'Cadastrar grupo' }}
+                </button>
+                @if (grupoEmEdicao()) {
+                  <button type="button" class="neutral-button" (click)="cancelarEdicaoGrupo()">Cancelar</button>
+                }
+              </div>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <caption>Grupos de item de compra</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Grupo</th>
+                    <th scope="col">Descricao</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (grupo of painel().grupos; track trackId($index, grupo)) {
+                    <tr>
+                      <td>{{ grupo.nome }}</td>
+                      <td class="description-cell">{{ grupo.descricao ?? '-' }}</td>
+                      <td>{{ grupo.ativo ? 'Ativo' : 'Inativo' }}</td>
+                      <td class="actions-cell">
+                        <button type="button" class="icon-button" title="Editar" aria-label="Editar grupo" (click)="editarGrupo(grupo)">&#9998;</button>
+                        <button type="button" class="icon-button neutral-button" title="Inativar" aria-label="Inativar grupo" (click)="desativarGrupo(grupo)">&#9675;</button>
+                        <button type="button" class="icon-button danger-button" title="Excluir" aria-label="Excluir grupo" (click)="excluirGrupo(grupo)">&#215;</button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="empty-cell">Nenhum grupo cadastrado.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        @case ('locais') {
+          <div class="form-grid">
+            <div class="stacked-forms">
+              <form class="form-panel" [formGroup]="fornecedorForm" (ngSubmit)="criarFornecedor()">
+                <h2>Cadastrar fornecedor</h2>
+                <label>
+                  <span>Nome</span>
+                  <input type="text" formControlName="nome" />
+                </label>
+                <label>
+                  <span>Contato</span>
+                  <input type="text" formControlName="contato" />
+                </label>
+                <label>
+                  <span>Telefone</span>
+                  <input type="text" formControlName="telefone" />
+                </label>
+                <button type="submit" [disabled]="fornecedorForm.invalid || salvando()">Cadastrar fornecedor</button>
+              </form>
+
+              <form class="form-panel" [formGroup]="localForm" (ngSubmit)="salvarLocal()">
+                <h2>{{ localEmEdicao() ? 'Editar local' : 'Cadastrar local' }}</h2>
+                <label>
+                  <span>Nome</span>
+                  <input type="text" formControlName="nome" />
+                </label>
+                <label>
+                  <span>Tipo</span>
+                  <select formControlName="tipo">
+                    @for (tipo of tiposLocal; track tipo.id) {
+                      <option [value]="tipo.id">{{ tipo.label }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>Fornecedor</span>
+                  <select formControlName="fornecedorId">
+                    <option value="">Sem fornecedor</option>
+                    @for (fornecedor of painel().fornecedores; track trackId($index, fornecedor)) {
+                      <option [value]="fornecedor.id">{{ fornecedor.nome }}</option>
+                    }
+                  </select>
+                </label>
+                <div class="button-row">
+                  <button type="submit" [disabled]="localForm.invalid || salvando()">
+                    {{ localEmEdicao() ? 'Salvar local' : 'Cadastrar local' }}
+                  </button>
+                  @if (localEmEdicao()) {
+                    <button type="button" class="neutral-button" (click)="cancelarEdicaoLocal()">Cancelar</button>
+                  }
+                </div>
+              </form>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <caption>Locais de compra</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Local</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Fornecedor</th>
+                    <th scope="col">Observacoes</th>
+                    <th scope="col">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (local of painel().locais; track trackId($index, local)) {
+                    <tr>
+                      <td>{{ local.nome }}</td>
+                      <td>{{ nomeTipoLocal(local.tipo) }}</td>
+                      <td>{{ local.fornecedorNome ?? '-' }}</td>
+                      <td class="description-cell">{{ local.observacoes ?? '-' }}</td>
+                      <td class="actions-cell">
+                        <button type="button" class="icon-button" title="Editar" aria-label="Editar local" (click)="editarLocal(local)">&#9998;</button>
+                        <button type="button" class="icon-button neutral-button" title="Inativar" aria-label="Inativar local" (click)="desativarLocal(local)">&#9675;</button>
+                        <button type="button" class="icon-button danger-button" title="Excluir" aria-label="Excluir local" (click)="excluirLocal(local)">&#215;</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        @case ('historico') {
+          <div class="table-wrap">
+            <table>
+              <caption>Historico de compras</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Data</th>
+                  <th scope="col">Item</th>
+                  <th scope="col">Fornecedor</th>
+                  <th scope="col">Pedido</th>
+                  <th scope="col" class="number-column">Qtd</th>
+                  <th scope="col" class="number-column">Unitario</th>
+                  <th scope="col" class="number-column">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (historico of painel().historico; track historico.pedidoId + '-' + historico.itemCompraId) {
+                  <tr>
+                    <td>{{ formatarData(historico.dataCompra ?? historico.dataFechamento) }}</td>
+                    <td class="description-cell">{{ historico.itemDescricao }}</td>
+                    <td>{{ historico.fornecedorNome ?? '-' }}</td>
+                    <td>{{ historico.numeroInterno }}</td>
+                    <td class="number-column">{{ formatarQuantidade(historico.quantidadeComprada, historico.unidadeSigla) }}</td>
+                    <td class="number-column">{{ formatarMoeda(historico.valorUnitario) }}</td>
+                    <td class="number-column">{{ formatarMoeda(historico.valorTotal) }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Nenhuma compra finalizada ainda.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </section>
+</section>

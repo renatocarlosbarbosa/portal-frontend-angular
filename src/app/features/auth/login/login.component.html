@@ -1,0 +1,56 @@
+<main class="login-page">
+  <section class="panel" aria-labelledby="login-title">
+    <div class="identity">
+      <span class="identity__mark" aria-hidden="true">
+        <img src="/grupoa2r2.png" alt="" />
+      </span>
+      <div>
+        <strong>Portal Grupo A2R2</strong>
+        <span>Brasil Cacau</span>
+      </div>
+    </div>
+
+    <div class="heading">
+      <h1 id="login-title">Acesso ao portal</h1>
+      <p>Use suas credenciais corporativas.</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label for="email">E-mail</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        aria-describedby="email-error"
+      />
+      @if (submitted() && form.controls.email.invalid) {
+        <small id="email-error" class="error">Informe um e-mail valido.</small>
+      }
+
+      <label for="password">Senha</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        aria-describedby="password-error"
+      />
+      @if (submitted() && form.controls.password.invalid) {
+        <small id="password-error" class="error">Informe uma senha com pelo menos 6 caracteres.</small>
+      }
+
+      @if (hasFormError()) {
+        <p class="form-error" role="alert">Revise os campos destacados antes de continuar.</p>
+      }
+
+      @if (loginError()) {
+        <p class="form-error" role="alert">Nao foi possivel autenticar com os dados informados.</p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+  </section>
+</main>

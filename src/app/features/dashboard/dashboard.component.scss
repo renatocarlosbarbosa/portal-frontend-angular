@@ -1,0 +1,283 @@
+:host {
+  display: block;
+}
+
+.dashboard {
+  display: grid;
+  gap: 18px;
+}
+
+.headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.eyebrow,
+.counter {
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.secondary-action {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 86%);
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.secondary-action:hover,
+.secondary-action:focus-visible {
+  border-color: var(--color-primary);
+  outline: 3px solid rgb(0 113 227 / 18%);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  margin-top: 4px;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.headline p {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.counter {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-subtle);
+  white-space: nowrap;
+}
+
+.sales-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.state-message {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-subtle);
+  color: var(--color-text-muted);
+}
+
+.state-message--error {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: var(--color-danger);
+}
+
+.day-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-subtle);
+}
+
+.day-card__summary {
+  display: grid;
+  width: 100%;
+  align-items: center;
+  gap: 14px;
+  grid-template-columns: 128px minmax(0, 1fr) 32px;
+  padding: 10px 12px;
+  border: 0;
+  background: rgb(255 255 255 / 86%);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.day-card__summary:hover,
+.day-card__summary:focus-visible {
+  background: #fbfbfd;
+  outline: 3px solid rgb(0 113 227 / 18%);
+  outline-offset: -3px;
+}
+
+.day-card__date,
+.total-item {
+  display: grid;
+  gap: 2px;
+}
+
+.day-card__date small,
+.total-item small {
+  color: var(--color-text-muted);
+}
+
+.day-card__date strong {
+  font-size: 1rem;
+}
+
+.day-card__totals {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(112px, 1fr));
+}
+
+.total-item {
+  min-height: 48px;
+  padding: 6px 8px;
+  border-left: 3px solid var(--color-border);
+  background: #fbfbfd;
+}
+
+.total-item strong {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.total-item small {
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.collapse-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: var(--radius-control);
+  background: linear-gradient(180deg, #0a84ff, var(--color-primary));
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.store-table-wrap {
+  overflow-x: auto;
+  padding: 0 12px 12px;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  border: 1px solid var(--color-border);
+  background: rgb(255 255 255 / 86%);
+  font-size: 0.85rem;
+}
+
+caption {
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+th,
+td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f5f5f7;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sticky-column {
+  left: 0;
+  position: sticky;
+  z-index: 2;
+  background: inherit;
+}
+
+thead .sticky-column {
+  z-index: 3;
+  background: #f5f5f7;
+}
+
+tbody tr:hover {
+  background: #e8f2ff;
+}
+
+tbody tr:nth-child(even) {
+  background: #fbfbfd;
+}
+
+tbody tr:nth-child(even):hover {
+  background: #e8f2ff;
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody td:not(:first-child) {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1180px) {
+  .day-card__summary,
+  .day-card__totals {
+    grid-template-columns: 1fr;
+  }
+
+  .day-card__summary {
+    align-items: start;
+  }
+
+  .collapse-icon {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 680px) {
+  .headline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+  }
+
+  h1 {
+    font-size: 1.45rem;
+  }
+
+  .day-card__summary {
+    padding: 12px;
+  }
+}

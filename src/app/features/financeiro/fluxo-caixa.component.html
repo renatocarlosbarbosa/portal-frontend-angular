@@ -1,0 +1,102 @@
+<section class="cashflow-page" aria-labelledby="cashflow-title">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Financeiro</span>
+      <h1 id="cashflow-title">Fluxo de caixa das lojas</h1>
+    </div>
+
+    <div class="filter-area">
+      <form class="filters" [formGroup]="filtros">
+        <label for="cashflow-start">
+          <span>Inicio</span>
+          <input id="cashflow-start" type="date" formControlName="dataInicial" />
+        </label>
+        <label for="cashflow-end">
+          <span>Fim</span>
+          <input id="cashflow-end" type="date" formControlName="dataFinal" />
+        </label>
+      </form>
+      <div class="quick-actions" aria-label="Atalhos de periodo">
+        <button type="button" (click)="aplicarMesAtual()">Mes atual</button>
+        <button type="button" (click)="aplicarProximos30Dias()">Prox. 30 dias</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="summary-grid" aria-label="Resumo do periodo">
+    <article>
+      <small>Entradas</small>
+      <strong>{{ formatarMoeda(resumo().totalEntradas) }}</strong>
+    </article>
+    <article>
+      <small>Saidas</small>
+      <strong>{{ formatarMoeda(resumo().totalSaidas) }}</strong>
+    </article>
+    <article>
+      <small>Saldo do periodo</small>
+      <strong [class]="saldoClasse()">{{ formatarMoeda(resumo().saldoPeriodo) }}</strong>
+    </article>
+    <article>
+      <small>Dias com movimento</small>
+      <strong>{{ diasPeriodo() }}</strong>
+    </article>
+    <article>
+      <small>Media diaria</small>
+      <strong [class.value--positive]="mediaDiaria() >= 0" [class.value--negative]="mediaDiaria() < 0">
+        {{ formatarMoeda(mediaDiaria()) }}
+      </strong>
+    </article>
+  </section>
+
+  <section class="cashflow-panel" aria-label="Fluxo de caixa diario por loja">
+    @if (carregando()) {
+      <p class="state-message">Carregando fluxo de caixa...</p>
+    } @else if (erroCarregamento()) {
+      <p class="state-message state-message--error" role="alert">
+        Nao foi possivel carregar o fluxo de caixa agora.
+      </p>
+    } @else if (resumo().linhas.length === 0) {
+      <p class="state-message">Nenhum movimento financeiro encontrado no periodo.</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <caption>
+            Fluxo de caixa diario consolidado por loja
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" class="date-column">Data</th>
+              <th scope="col" class="money-column">Entradas</th>
+              <th scope="col" class="money-column">Saidas</th>
+              <th scope="col" class="money-column">Saldo</th>
+              <th scope="col" class="money-column">Acumulado</th>
+              @for (loja of resumo().lojas; track loja) {
+                <th scope="col" class="money-column">{{ loja }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (linha of resumo().linhas; track linha.dataMovimento) {
+              <tr>
+                <th scope="row" class="date-column">{{ linha.dataLabel }}</th>
+                <td class="money-column">{{ formatarMoeda(linha.entradas) }}</td>
+                <td class="money-column">{{ formatarMoeda(linha.saidas) }}</td>
+                <td class="money-column" [class.value--positive]="linha.saldo >= 0" [class.value--negative]="linha.saldo < 0">
+                  {{ formatarMoeda(linha.saldo) }}
+                </td>
+                <td class="money-column" [class.value--positive]="linha.saldoAcumulado >= 0" [class.value--negative]="linha.saldoAcumulado < 0">
+                  {{ formatarMoeda(linha.saldoAcumulado) }}
+                </td>
+                @for (loja of resumo().lojas; track loja) {
+                  <td class="money-column">
+                    {{ formatarMoeda(linha.saldoPorLoja[loja]) }}
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>

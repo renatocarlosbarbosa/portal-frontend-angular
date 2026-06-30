@@ -1,0 +1,108 @@
+<section class="stock-page" aria-labelledby="stock-title">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Estoque</span>
+      <h1 id="stock-title">Produtos por loja</h1>
+    </div>
+
+    <div class="search-actions">
+      <label class="search-field" for="stock-search">
+        <span>Buscar produto</span>
+        <input
+          id="stock-search"
+          type="search"
+          [formControl]="filtro"
+          placeholder="Descricao, EAN, ID ou grupo"
+          autocomplete="off"
+        />
+      </label>
+      <label class="search-field" for="stock-active">
+        <span>Ativo</span>
+        <select id="stock-active" [formControl]="filtroAtivo">
+          <option value="true">Sim</option>
+          <option value="false">Nao</option>
+          <option value="todos">Todos</option>
+        </select>
+      </label>
+      <label class="search-field" for="stock-sale-active">
+        <span>Ativo venda</span>
+        <select id="stock-sale-active" [formControl]="filtroAtivoVenda">
+          <option value="true">Sim</option>
+          <option value="false">Nao</option>
+          <option value="todos">Todos</option>
+        </select>
+      </label>
+      <button type="button" class="secondary-action" (click)="limparFiltro()">Limpar</button>
+    </div>
+  </header>
+
+  <section class="matrix-panel" aria-label="Matriz de estoque por loja">
+    @if (carregando()) {
+      <p class="state-message">Carregando estoque atualizado...</p>
+    } @else if (erroCarregamento()) {
+      <p class="state-message state-message--error" role="alert">
+        Nao foi possivel carregar as informacoes de estoque agora.
+      </p>
+    } @else if (matriz().linhas.length === 0) {
+      <p class="state-message">Nenhum produto encontrado para o filtro informado.</p>
+    } @else {
+      <div class="matrix-summary">
+        <span>{{ matriz().linhas.length }} produtos</span>
+        <span>{{ matriz().lojas.length }} lojas</span>
+        <span>{{ formatarQuantidade(totalQuantidade()) }} unidades</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>
+            Quantidade em estoque no cruzamento entre produto e sap_loja
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" class="product-column" [attr.aria-sort]="ariaSort('produto')">
+                <button type="button" class="sort-button sort-button--product" (click)="ordenarPorProduto()">
+                  Produto
+                  <span aria-hidden="true">{{ indicadorOrdenacao('produto') }}</span>
+                </button>
+              </th>
+              <th scope="col">EAN</th>
+              <th scope="col">Subgrupo</th>
+              @for (loja of matriz().lojas; track loja) {
+                <th scope="col" class="quantity-column" [attr.aria-sort]="ariaSort(colunaLoja(loja))">
+                  <button type="button" class="sort-button sort-button--number" (click)="ordenarPorLoja(loja)">
+                    {{ loja }}
+                    <span aria-hidden="true">{{ indicadorOrdenacao(colunaLoja(loja)) }}</span>
+                  </button>
+                </th>
+              }
+              <th scope="col" class="quantity-column" [attr.aria-sort]="ariaSort('total')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPorTotal()">
+                  Total
+                  <span aria-hidden="true">{{ indicadorOrdenacao('total') }}</span>
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (linha of linhasOrdenadas(); track linha.idProduto) {
+              <tr>
+                <th scope="row" class="product-column">
+                  <strong>{{ linha.descricaoProduto }}</strong>
+                  <small>ID {{ linha.idProduto }}</small>
+                </th>
+                <td>{{ linha.numeroEan ?? '-' }}</td>
+                <td>{{ linha.subgrupoNome ?? '-' }}</td>
+                @for (loja of matriz().lojas; track loja) {
+                  <td class="quantity-column">
+                    {{ formatarQuantidade(linha.quantidadePorLoja[loja]) }}
+                  </td>
+                }
+                <td class="quantity-column total-column">{{ formatarQuantidade(linha.total) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>

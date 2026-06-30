@@ -1,0 +1,122 @@
+:host {
+  display: block;
+  padding-bottom: 78px;
+}
+
+.cash-page,
+.summary-list {
+  display: grid;
+  gap: 14px;
+}
+
+.cash-header,
+.fixed-footer,
+.summary-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 3px 0 0;
+  font-size: 1.55rem;
+}
+
+.cash-header a {
+  color: var(--color-primary);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.summary-list {
+  max-width: 720px;
+}
+
+.summary-list article {
+  min-height: 72px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-subtle);
+}
+
+.summary-list span {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.summary-list strong {
+  font-size: 1.25rem;
+}
+
+.summary-total {
+  border-color: rgb(0 113 227 / 30%) !important;
+  background: #eef9f6 !important;
+}
+
+.summary-total strong {
+  color: var(--color-primary);
+  font-size: 1.65rem;
+}
+
+.fixed-footer {
+  position: fixed;
+  right: 24px;
+  bottom: 0;
+  left: 284px;
+  z-index: 10;
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-border);
+  background: rgb(255 255 255 / 96%);
+}
+
+button,
+.secondary-action {
+  display: inline-grid;
+  min-height: 42px;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  background: linear-gradient(180deg, #0a84ff, var(--color-primary));
+  color: #ffffff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.secondary-action {
+  border-color: var(--color-border);
+  background: rgb(255 255 255 / 86%);
+  color: var(--color-text);
+}
+
+@media (max-width: 820px) {
+  .fixed-footer {
+    right: 0;
+    left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .cash-header,
+  .summary-list article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

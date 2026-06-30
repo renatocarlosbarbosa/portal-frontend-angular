@@ -1,0 +1,51 @@
+<section class="cash-page" aria-labelledby="cash-count-title">
+  <header class="cash-header">
+    <div>
+      <span class="eyebrow">Fechamento de Caixa</span>
+      <h1 id="cash-count-title">Contagem do dinheiro</h1>
+    </div>
+    <a routerLink="/caixa/resumo">Resumo</a>
+  </header>
+
+  @if (carregando()) {
+    <p class="state-message">Carregando configuracao...</p>
+  } @else if (erro()) {
+    <p class="state-message state-message--error" role="alert">{{ erro() }}</p>
+  } @else {
+    <div class="count-list" aria-label="Denominacoes para contagem">
+      <div class="count-row count-row--head" aria-hidden="true">
+        <span>Valor</span>
+        <span>Quantidade</span>
+        <span>Total</span>
+      </div>
+
+      @for (denominacao of caixaFechamentoService.denominacoes(); track denominacao.codigo) {
+        <div class="count-row">
+          <strong>{{ formatarMoeda(denominacao.valor) }}</strong>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            [value]="caixaFechamentoService.gerarDTOBase().itensContagem[$index].quantidade"
+            [attr.aria-label]="'Quantidade de ' + denominacao.descricao"
+            (input)="atualizarQuantidade(denominacao.codigo, $any($event.target).value)"
+          />
+          <span class="readonly-total">
+            {{ formatarMoeda(caixaFechamentoService.gerarDTOBase().itensContagem[$index].valorTotal) }}
+          </span>
+        </div>
+      }
+    </div>
+
+    <section class="total-card" aria-label="Total em dinheiro">
+      <span>Total em dinheiro</span>
+      <strong>{{ formatarMoeda(caixaFechamentoService.totalDinheiro()) }}</strong>
+    </section>
+  }
+
+  <footer class="fixed-footer">
+    <button type="button" class="secondary-action" (click)="limpar()">Limpar</button>
+    <button type="button" (click)="avancar()">Avancar</button>
+  </footer>
+</section>

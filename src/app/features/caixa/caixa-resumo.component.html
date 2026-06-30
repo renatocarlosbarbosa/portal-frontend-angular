@@ -1,0 +1,32 @@
+<section class="cash-page" aria-labelledby="cash-summary-title">
+  <header class="cash-header">
+    <div>
+      <span class="eyebrow">Fechamento de Caixa</span>
+      <h1 id="cash-summary-title">Resumo para conferencia</h1>
+    </div>
+    <a routerLink="/caixa/contagem">Editar contagem</a>
+  </header>
+
+  <section class="summary-list" aria-label="Resumo operacional do caixa">
+    <article>
+      <span>Total em dinheiro</span>
+      <strong>{{ formatarMoeda(caixaFechamentoService.totalDinheiro()) }}</strong>
+    </article>
+    <article>
+      <span>PIX</span>
+      <strong>{{ formatarMoeda(caixaFechamentoService.totalPix()) }}</strong>
+    </article>
+    <article>
+      <span>Cartoes</span>
+      <strong>{{ formatarMoeda(caixaFechamentoService.totalCartoes()) }}</strong>
+    </article>
+    <article class="summary-total">
+      <span>Total geral</span>
+      <strong>{{ formatarMoeda(caixaFechamentoService.totalGeral()) }}</strong>
+    </article>
+  </section>
+
+  <footer class="fixed-footer">
+    <a routerLink="/caixa/cartoes-pix" class="secondary-action">Voltar</a>
+  </footer>
+</section>

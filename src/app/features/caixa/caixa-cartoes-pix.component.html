@@ -1,0 +1,50 @@
+<section class="cash-page" aria-labelledby="cash-electronic-title">
+  <header class="cash-header">
+    <div>
+      <span class="eyebrow">Fechamento de Caixa</span>
+      <h1 id="cash-electronic-title">Cartoes e PIX</h1>
+    </div>
+    <a routerLink="/caixa/contagem">Voltar para contagem</a>
+  </header>
+
+  <section class="form-panel">
+    <label>
+      <span>Valor total da maquininha</span>
+      <input
+        #totalMaquininha
+        type="number"
+        min="0"
+        step="0.01"
+        inputmode="decimal"
+        [value]="caixaFechamentoService.recebimentosEletronicos().totalMaquininha"
+        (input)="atualizarRecebimentos(totalMaquininha.value, valorPix.value)"
+      />
+    </label>
+
+    <label>
+      <span>Valor PIX</span>
+      <input
+        #valorPix
+        type="number"
+        min="0"
+        step="0.01"
+        inputmode="decimal"
+        [value]="caixaFechamentoService.recebimentosEletronicos().pix"
+        (input)="atualizarRecebimentos(totalMaquininha.value, valorPix.value)"
+      />
+    </label>
+
+    <div class="readonly-field">
+      <span>Valor liquido de cartoes</span>
+      <strong>{{ formatarMoeda(caixaFechamentoService.totalCartoes()) }}</strong>
+      @if (caixaFechamentoService.recebimentosEletronicos().pix > caixaFechamentoService.recebimentosEletronicos().totalMaquininha) {
+        <small>PIX maior que a maquininha. Cartoes mantido em R$ 0,00.</small>
+      }
+    </div>
+  </section>
+
+  <footer class="fixed-footer">
+    <a routerLink="/caixa/contagem" class="secondary-action">Voltar</a>
+    <button type="button" (click)="avancar()">Avancar</button>
+  </footer>
+</section>

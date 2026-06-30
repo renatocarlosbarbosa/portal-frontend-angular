@@ -1,0 +1,71 @@
+<div class="shell">
+  <aside class="sidebar" aria-label="Navegacao principal">
+    <a class="brand" routerLink="/dashboard" aria-label="Portal Grupo A2R2">
+      <span class="brand__mark" aria-hidden="true">
+        <img src="/grupoa2r2.png" alt="" />
+      </span>
+      <span>
+        <strong>Portal Grupo A2R2</strong>
+        <small>Brasil Cacau</small>
+      </span>
+    </a>
+
+    <nav class="menu" aria-label="Modulos">
+      <a routerLink="/dashboard" routerLinkActive="menu__item--active" class="menu__item">
+        <span class="menu__icon" aria-hidden="true"><img src="/grupoa2r2.png" alt="" /></span>
+        <span>
+          <strong>Dashboard</strong>
+          <small>Vendas diarias</small>
+        </span>
+      </a>
+      <a routerLink="/estoque" routerLinkActive="menu__item--active" class="menu__item">
+        <span class="menu__icon" aria-hidden="true"><img src="/grupoa2r2.png" alt="" /></span>
+        <span>
+          <strong>Estoque</strong>
+          <small>Produto x loja</small>
+        </span>
+      </a>
+      <a routerLink="/financeiro/consultas" routerLinkActive="menu__item--active" class="menu__item">
+        <span class="menu__icon" aria-hidden="true"><img src="/grupoa2r2.png" alt="" /></span>
+        <span>
+          <strong>Financeiro</strong>
+          <small>Caixa e conciliacao</small>
+        </span>
+      </a>
+      <a routerLink="/caixa/contagem" routerLinkActive="menu__item--active" class="menu__item">
+        <span class="menu__icon" aria-hidden="true"><img src="/grupoa2r2.png" alt="" /></span>
+        <span>
+          <strong>Fechamento</strong>
+          <small>Caixa da loja</small>
+        </span>
+      </a>
+      <a routerLink="/compras/organizacao" routerLinkActive="menu__item--active" class="menu__item">
+        <span class="menu__icon" aria-hidden="true"><img src="/grupoa2r2.png" alt="" /></span>
+        <span>
+          <strong>Compras</strong>
+          <small>Insumos e apoio</small>
+        </span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div>
+        <strong>Gestao de lojas</strong>
+        <span>Brasil Cacau | Lojas ativas</span>
+      </div>
+
+      @if (user(); as currentUser) {
+        <div class="user">
+          <span>{{ currentUser.name }}</span>
+          <small>{{ currentUser.email }}</small>
+        </div>
+      }
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

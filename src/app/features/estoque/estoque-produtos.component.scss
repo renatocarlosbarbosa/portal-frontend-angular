@@ -1,0 +1,258 @@
+:host {
+  display: block;
+}
+
+.stock-page {
+  display: grid;
+  gap: 18px;
+}
+
+.page-header {
+  display: grid;
+  align-items: end;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(520px, 760px);
+}
+
+.search-actions {
+  display: grid;
+  align-items: end;
+  gap: 8px;
+  grid-template-columns: minmax(220px, 1fr) minmax(110px, 130px) minmax(130px, 150px) auto;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  margin-top: 4px;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.search-field {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.search-field span {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.search-field input,
+.search-field select {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 86%);
+  color: var(--color-text);
+}
+
+.search-field input:focus-visible,
+.search-field select:focus-visible {
+  border-color: var(--color-primary);
+  outline: 3px solid rgb(0 113 227 / 18%);
+}
+
+.secondary-action {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 86%);
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.secondary-action:hover,
+.secondary-action:focus-visible {
+  border-color: var(--color-primary);
+  outline: 3px solid rgb(0 113 227 / 18%);
+}
+
+.matrix-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.state-message {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-subtle);
+  color: var(--color-text-muted);
+}
+
+.state-message--error {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: var(--color-danger);
+}
+
+.matrix-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.matrix-summary span {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-subtle);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 86%);
+}
+
+table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+caption {
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  clip: rect(1px, 1px, 1px, 1px);
+}
+
+th,
+td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f5f5f7;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sort-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-align: inherit;
+  text-transform: inherit;
+}
+
+.sort-button span {
+  color: var(--color-primary);
+  font-size: 0.8rem;
+}
+
+.sort-button--number {
+  justify-content: flex-end;
+}
+
+.sort-button:hover,
+.sort-button:focus-visible {
+  color: var(--color-primary);
+  outline: none;
+}
+
+tbody tr:nth-child(even) {
+  background: #fbfbfd;
+}
+
+tbody tr:hover {
+  background: #e8f2ff;
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.product-column {
+  left: 0;
+  min-width: 300px;
+  max-width: 420px;
+  position: sticky;
+  z-index: 2;
+  background: inherit;
+  white-space: normal;
+}
+
+thead .product-column {
+  z-index: 3;
+  background: #f5f5f7;
+}
+
+.product-column strong,
+.product-column small {
+  display: block;
+}
+
+.product-column small {
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.quantity-column {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.total-column {
+  background: rgb(0 113 227 / 8%);
+  font-weight: 800;
+}
+
+@media (max-width: 780px) {
+  .page-header {
+    grid-template-columns: 1fr;
+  }
+
+  .search-actions {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 1.45rem;
+  }
+}
