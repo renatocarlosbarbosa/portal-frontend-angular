@@ -46,11 +46,44 @@ export const routes: Routes = [
       },
       {
         path: 'financeiro/consultas',
+        pathMatch: 'full',
+        redirectTo: 'financeiro/fluxo-diario',
+      },
+      {
+        path: 'financeiro/fluxo-diario',
         loadComponent: () =>
           import('./features/financeiro/financeiro-consultas.component').then(
             (m) => m.FinanceiroConsultasComponent,
           ),
-        title: 'Financeiro | Portal Grupo A2R2',
+        data: { secaoFinanceira: 'fluxo' },
+        title: 'Fluxo Diario | Portal Grupo A2R2',
+      },
+      {
+        path: 'financeiro/contas-ciss',
+        loadComponent: () =>
+          import('./features/financeiro/financeiro-consultas.component').then(
+            (m) => m.FinanceiroConsultasComponent,
+          ),
+        data: { secaoFinanceira: 'contas' },
+        title: 'Contas CISS | Portal Grupo A2R2',
+      },
+      {
+        path: 'financeiro/extrato-bancario',
+        loadComponent: () =>
+          import('./features/financeiro/financeiro-consultas.component').then(
+            (m) => m.FinanceiroConsultasComponent,
+          ),
+        data: { secaoFinanceira: 'extrato' },
+        title: 'Extrato Bancario | Portal Grupo A2R2',
+      },
+      {
+        path: 'financeiro/cartoes',
+        loadComponent: () =>
+          import('./features/financeiro/financeiro-consultas.component').then(
+            (m) => m.FinanceiroConsultasComponent,
+          ),
+        data: { secaoFinanceira: 'cartoes' },
+        title: 'Cartoes | Portal Grupo A2R2',
       },
       {
         path: 'compras/organizacao',

@@ -2,7 +2,8 @@
   <header class="page-header">
     <div>
       <span class="eyebrow">Financeiro</span>
-      <h1 id="finance-title">Analise financeira</h1>
+      <h1 id="finance-title">{{ secaoConfig().titulo }}</h1>
+      <p>{{ secaoConfig().resumo }}</p>
     </div>
 
     <div class="filter-area">
@@ -24,6 +25,18 @@
             }
           </select>
         </label>
+        @if (secaoAtiva() === 'extrato') {
+          <label for="finance-type">
+            <span>Tipo</span>
+            <select id="finance-type" formControlName="tipoLancamentoId">
+              <option value="">Todos</option>
+              <option [value]="filtroNaoClassificado">Nao classificado</option>
+              @for (tipo of tiposLancamento(); track trackTipoLancamento($index, tipo)) {
+                <option [value]="tipo.id">{{ tipo.nome }}</option>
+              }
+            </select>
+          </label>
+        }
       </form>
       <div class="quick-actions" aria-label="Atalhos de periodo">
         <button type="button" (click)="aplicarMesAtual()">Mes atual</button>
@@ -58,27 +71,14 @@
       <strong>{{ contasReceber().length }} / {{ contasPagar().length }}</strong>
     </article>
     <article>
-      <small>Extratos</small>
-      <strong>{{ painel().extratos.length }}</strong>
+      <small>Registros</small>
+      <strong>{{ secaoConfig().contador() }}</strong>
     </article>
     <article>
       <small>Cartoes liquido</small>
       <strong>{{ formatarMoeda(cartoesLiquido()) }}</strong>
     </article>
   </section>
-
-  <nav class="tabs" aria-label="Consultas financeiras">
-    @for (aba of abas; track aba.id) {
-      <button
-        type="button"
-        [class.tab--active]="abaAtiva() === aba.id"
-        (click)="selecionarAba(aba.id)"
-      >
-        <span>{{ aba.label }}</span>
-        <strong>{{ aba.contador() }}</strong>
-      </button>
-    }
-  </nav>
 
   <section class="panel">
     @if (carregando()) {
@@ -88,7 +88,7 @@
         Nao foi possivel carregar as consultas financeiras.
       </p>
     } @else {
-      @switch (abaAtiva()) {
+      @switch (secaoAtiva()) {
         @case ('fluxo') {
           <div class="table-wrap">
             <table>
@@ -166,34 +166,99 @@
         }
 
         @case ('extrato') {
+          @if (mensagemClassificacao()) {
+            <p class="inline-feedback" role="status">{{ mensagemClassificacao() }}</p>
+          }
+          <div class="bulk-actions" aria-label="Classificacao em lote">
+            <span>{{ quantidadeExtratosSelecionados() }} selecionado(s)</span>
+            <select
+              class="inline-select"
+              [value]="tipoLancamentoLote()"
+              [disabled]="quantidadeExtratosSelecionados() === 0 || salvandoClassificacao() === 'LOTE'"
+              (change)="atualizarTipoLancamentoLoteSelecionado($event)"
+              aria-label="Tipo para lancamentos selecionados"
+            >
+              <option value="">Selecionar tipo</option>
+              @for (tipo of tiposLancamentoPermitidosLote(); track trackTipoLancamento($index, tipo)) {
+                <option [value]="tipo.id">{{ tipo.nome }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              [disabled]="quantidadeExtratosSelecionados() === 0 || !tipoLancamentoLote() || salvandoClassificacao() === 'LOTE'"
+              (click)="atualizarTipoLancamentoLote()"
+            >
+              Aplicar
+            </button>
+          </div>
           <div class="table-wrap">
             <table>
               <caption>Extrato bancario importado</caption>
               <thead>
                 <tr>
+                  <th scope="col" class="select-column">
+                    <input
+                      type="checkbox"
+                      [checked]="todosExtratosExibidosSelecionados()"
+                      (change)="alternarTodosExtratosExibidos($event)"
+                      aria-label="Selecionar todos os lancamentos exibidos"
+                    />
+                  </th>
                   <th scope="col">Data</th>
                   <th scope="col">Loja</th>
                   <th scope="col">Banco</th>
                   <th scope="col">Conta</th>
                   <th scope="col">Historico</th>
+                  <th scope="col">Tipo receita/despesa</th>
                   <th scope="col" class="money-column">Valor</th>
                 </tr>
               </thead>
               <tbody>
-                @for (extrato of painel().extratos; track trackOrigem($index, extrato)) {
+                @for (extrato of extratosExibidos(); track trackOrigem($index, extrato)) {
                   <tr>
+                    <td class="select-column">
+                      <input
+                        type="checkbox"
+                        [checked]="extratoSelecionado(extrato)"
+                        (change)="alternarExtratoSelecionado(extrato, $event)"
+                        [attr.aria-label]="'Selecionar lancamento ' + extrato.origemChave"
+                      />
+                    </td>
                     <td>{{ formatarData(extrato.dataTransacao) }}</td>
                     <td>{{ extrato.sapLoja }}</td>
                     <td>{{ extrato.numeroBanco ?? '-' }}</td>
                     <td>{{ extrato.numeroConta ?? '-' }}</td>
                     <td class="description-cell">{{ extrato.historicoTransacao ?? '-' }}</td>
+                    <td>
+                      <select
+                        class="inline-select"
+                        [disabled]="salvandoClassificacao() === extrato.origemChave"
+                        (change)="atualizarTipoLancamento(extrato, $event)"
+                        aria-label="Tipo de receita ou despesa"
+                      >
+                        <option value="" [selected]="!resolverTipoLancamentoValor(extrato)">Nao classificado</option>
+                        @if (tipoLancamentoAusenteNasOpcoes(extrato)) {
+                          <option [value]="resolverTipoLancamentoValor(extrato)" selected>
+                            {{ nomeTipoLancamentoAtual(extrato) }}
+                          </option>
+                        }
+                        @for (tipo of tiposLancamentoPermitidos(extrato); track trackTipoLancamento($index, tipo)) {
+                          <option
+                            [value]="tipo.id"
+                            [selected]="tipoLancamentoSelecionado(extrato, tipo.id)"
+                          >
+                            {{ tipo.nome }}
+                          </option>
+                        }
+                      </select>
+                    </td>
                     <td class="money-column" [class]="tipoValorClasse(extrato.valorTransacao)">
                       {{ formatarMoeda(extrato.valorTransacao) }}
                     </td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="6" class="empty-cell">Nenhum extrato encontrado no periodo.</td>
+                    <td colspan="8" class="empty-cell">Nenhum extrato encontrado no periodo.</td>
                   </tr>
                 }
               </tbody>

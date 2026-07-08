@@ -39,6 +39,40 @@ export interface ConciliacaoExtratoOrigem {
   readonly dataTransacao: string;
   readonly historicoTransacao: string | null;
   readonly valorTransacao: number;
+  readonly dataHoraImportacao: string | null;
+  readonly tipoLancamentoId: number | null;
+  readonly tipoLancamentoNome: string | null;
+  readonly categoriaFinanceiraId: number | null;
+  readonly categoriaFinanceiraNome: string | null;
+  readonly origemClassificacao: string | null;
+  readonly classificacaoObservacao: string | null;
+  readonly dataHoraVinculacao: string | null;
+}
+
+export interface TipoLancamentoBancario {
+  readonly id: number;
+  readonly nome: string;
+  readonly natureza: 'ENTRADA' | 'SAIDA' | 'AMBOS' | string;
+  readonly categoriaFinanceiraId: number | null;
+  readonly categoriaFinanceiraNome: string | null;
+  readonly ativo: boolean;
+}
+
+export interface AtualizarClassificacaoExtratoRequest {
+  readonly origemTabela: string;
+  readonly origemChave: string;
+  readonly tipoLancamentoId: number | null;
+  readonly categoriaFinanceiraId?: number | null;
+  readonly observacao?: string | null;
+  readonly usuario?: string | null;
+}
+
+export interface AtualizarClassificacaoExtratoLoteRequest {
+  readonly origemChaves: readonly string[];
+  readonly tipoLancamentoId: number | null;
+  readonly categoriaFinanceiraId?: number | null;
+  readonly observacao?: string | null;
+  readonly usuario?: string | null;
 }
 
 export interface ConciliacaoCartaoOrigem {
