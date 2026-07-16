@@ -1,0 +1,174 @@
+<section class="sales-products-page" aria-labelledby="sales-products-title">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Vendas</span>
+      <h1 id="sales-products-title">Vendas por produto</h1>
+      <p>Relatorio operacional por loja, produto, quantidade, total bruto, desconto e total liquido.</p>
+    </div>
+
+    <div class="filter-area">
+      <form class="filters" [formGroup]="filtros">
+        <label for="sales-start">
+          <span>Inicio</span>
+          <input id="sales-start" type="date" formControlName="dataInicial" />
+        </label>
+        <label for="sales-end">
+          <span>Fim</span>
+          <input id="sales-end" type="date" formControlName="dataFinal" />
+        </label>
+        <label for="sales-store">
+          <span>Loja</span>
+          <select id="sales-store" formControlName="sapLoja">
+            <option value="">Todas</option>
+            @for (loja of lojas; track loja) {
+              <option [value]="loja">{{ loja }}</option>
+            }
+          </select>
+        </label>
+        <label for="sales-search">
+          <span>Produto</span>
+          <input
+            id="sales-search"
+            type="search"
+            formControlName="termo"
+            placeholder="Codigo, SAP, descricao ou NCM"
+            autocomplete="off"
+          />
+        </label>
+      </form>
+      <div class="quick-actions" aria-label="Atalhos do relatorio">
+        <button type="button" (click)="aplicarHoje()">Hoje</button>
+        <button type="button" (click)="aplicarMesAtual()">Mes atual</button>
+        <button type="button" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="summary-grid" aria-label="Totais de vendas por produto">
+    <article>
+      <small>Produtos</small>
+      <strong>{{ vendas().length }}</strong>
+    </article>
+    <article>
+      <small>Lojas</small>
+      <strong>{{ lojasAgrupadas().length }}</strong>
+    </article>
+    <article>
+      <small>Quantidade</small>
+      <strong>{{ formatarQuantidade(totalQuantidade()) }}</strong>
+    </article>
+    <article>
+      <small>Total bruto</small>
+      <strong>{{ formatarMoeda(totalBruto()) }}</strong>
+    </article>
+    <article>
+      <small>Desconto</small>
+      <strong>{{ formatarMoeda(totalDesconto()) }}</strong>
+    </article>
+    <article>
+      <small>Total liquido</small>
+      <strong>{{ formatarMoeda(totalLiquido()) }}</strong>
+    </article>
+  </section>
+
+  <section class="report-panel" aria-label="Relatorio de vendas por produto">
+    @if (carregando()) {
+      <p class="state-message">Carregando vendas por produto...</p>
+    } @else if (erroCarregamento()) {
+      <p class="state-message state-message--error" role="alert">
+        Nao foi possivel carregar as vendas por produto.
+      </p>
+    } @else if (vendas().length === 0) {
+      <p class="state-message">Nenhuma venda encontrada para os filtros informados.</p>
+    } @else {
+      <div class="report-meta">
+        <span>Periodo: {{ formatarData(filtros.controls.dataInicial.value) }} a {{ formatarData(filtros.controls.dataFinal.value) }}</span>
+        <span>Atualizado no portal</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Relatorio de vendas por produto agrupado por loja</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="code-column" [attr.aria-sort]="ariaSort('idProduto')">
+                <button type="button" class="sort-button" (click)="ordenarPor('idProduto')">
+                  Cod Produto <span>{{ indicadorOrdenacao('idProduto') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="sap-column" [attr.aria-sort]="ariaSort('codigoSap')">
+                <button type="button" class="sort-button" (click)="ordenarPor('codigoSap')">
+                  Cod. SAP <span>{{ indicadorOrdenacao('codigoSap') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="description-column" [attr.aria-sort]="ariaSort('descricaoProduto')">
+                <button type="button" class="sort-button" (click)="ordenarPor('descricaoProduto')">
+                  Descricao <span>{{ indicadorOrdenacao('descricaoProduto') }}</span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="ariaSort('ncm')">
+                <button type="button" class="sort-button" (click)="ordenarPor('ncm')">
+                  NCM <span>{{ indicadorOrdenacao('ncm') }}</span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="ariaSort('unidade')">
+                <button type="button" class="sort-button" (click)="ordenarPor('unidade')">
+                  UN. <span>{{ indicadorOrdenacao('unidade') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="number-column" [attr.aria-sort]="ariaSort('quantidade')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('quantidade')">
+                  Quant. <span>{{ indicadorOrdenacao('quantidade') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('valorTotalBruto')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('valorTotalBruto')">
+                  Total Bruto <span>{{ indicadorOrdenacao('valorTotalBruto') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('valorDesconto')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('valorDesconto')">
+                  Desconto <span>{{ indicadorOrdenacao('valorDesconto') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('valorTotalLiquido')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('valorTotalLiquido')">
+                  Total Liquido <span>{{ indicadorOrdenacao('valorTotalLiquido') }}</span>
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (loja of lojasAgrupadas(); track trackLoja($index, loja)) {
+              <tr class="store-row">
+                <th scope="rowgroup" colspan="9">
+                  LOJA {{ loja.sapLoja }}
+                </th>
+              </tr>
+              @for (venda of loja.itens; track trackProduto($index, venda)) {
+                <tr>
+                  <td class="code-column">{{ venda.idProduto }}</td>
+                  <td class="sap-column">{{ venda.codigoSap ?? '-' }}</td>
+                  <td class="description-column">{{ venda.descricaoProduto ?? '-' }}</td>
+                  <td>{{ venda.ncm ?? '-' }}</td>
+                  <td>{{ venda.unidade ?? '-' }}</td>
+                  <td class="number-column">{{ formatarQuantidade(venda.quantidade) }}</td>
+                  <td class="money-column">{{ formatarMoeda(venda.valorTotalBruto) }}</td>
+                  <td class="money-column">{{ formatarMoeda(venda.valorDesconto) }}</td>
+                  <td class="money-column total-cell">{{ formatarMoeda(venda.valorTotalLiquido) }}</td>
+                </tr>
+              }
+              <tr class="store-total-row">
+                <td colspan="5">Total da loja {{ loja.sapLoja }}</td>
+                <td class="number-column">{{ formatarQuantidade(loja.quantidade) }}</td>
+                <td class="money-column">{{ formatarMoeda(loja.valorTotalBruto) }}</td>
+                <td class="money-column">{{ formatarMoeda(loja.valorDesconto) }}</td>
+                <td class="money-column">{{ formatarMoeda(loja.valorTotalLiquido) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>

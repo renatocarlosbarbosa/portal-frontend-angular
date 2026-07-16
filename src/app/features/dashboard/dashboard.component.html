@@ -25,7 +25,7 @@
       <p class="state-message">Nenhum indicador encontrado para o periodo.</p>
     }
 
-    @for (dia of resumoPorDia(); track dia.data) {
+    @for (dia of resumoOrdenado(); track dia.data) {
       <article class="day-card">
         <button
           type="button"
@@ -61,9 +61,17 @@
               </caption>
               <thead>
                 <tr>
-                  <th scope="col" class="sticky-column">sap_loja</th>
+                  <th scope="col" class="sticky-column" [attr.aria-sort]="ariaSort('sap_loja')">
+                    <button type="button" class="sort-button" (click)="ordenarPor('sap_loja')">
+                      sap_loja <span>{{ indicadorOrdenacao('sap_loja') }}</span>
+                    </button>
+                  </th>
                   @for (indicador of dia.lojas[0]?.indicadores ?? []; track indicador.label) {
-                    <th scope="col">{{ indicador.label }}</th>
+                    <th scope="col" [attr.aria-sort]="ariaSort(indicador.label)">
+                      <button type="button" class="sort-button" (click)="ordenarPor(indicador.label)">
+                        {{ indicador.label }} <span>{{ indicadorOrdenacao(indicador.label) }}</span>
+                      </button>
+                    </th>
                   }
                 </tr>
               </thead>

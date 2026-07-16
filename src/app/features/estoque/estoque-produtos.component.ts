@@ -16,7 +16,7 @@ import {
 import { ProdutoEstoqueFlagFiltro, ProdutoEstoqueLinha } from './produto-estoque';
 import { ProdutoEstoqueService } from './produto-estoque.service';
 
-type EstoqueSortColumn = 'produto' | 'total' | `loja:${string}`;
+type EstoqueSortColumn = 'produto' | 'ean' | 'subgrupo' | 'total' | `loja:${string}`;
 type SortDirection = 'asc' | 'desc';
 
 interface EstoqueSortState {
@@ -112,6 +112,14 @@ export class EstoqueProdutosComponent {
     this.alternarOrdenacao('produto');
   }
 
+  protected ordenarPorEan(): void {
+    this.alternarOrdenacao('ean');
+  }
+
+  protected ordenarPorSubgrupo(): void {
+    this.alternarOrdenacao('subgrupo');
+  }
+
   protected indicadorOrdenacao(coluna: EstoqueSortColumn): string {
     const estado = this.ordenacao();
 
@@ -141,7 +149,7 @@ export class EstoqueProdutosComponent {
       if (estadoAtual.column !== coluna) {
         return {
           column: coluna,
-          direction: coluna === 'produto' ? 'asc' : 'desc',
+          direction: coluna === 'produto' || coluna === 'ean' || coluna === 'subgrupo' ? 'asc' : 'desc',
         };
       }
 
@@ -159,6 +167,14 @@ export class EstoqueProdutosComponent {
   ): number {
     if (coluna === 'produto') {
       return linhaA.descricaoProduto.localeCompare(linhaB.descricaoProduto, 'pt-BR');
+    }
+
+    if (coluna === 'ean') {
+      return (linhaA.numeroEan ?? '').localeCompare(linhaB.numeroEan ?? '', 'pt-BR', { numeric: true });
+    }
+
+    if (coluna === 'subgrupo') {
+      return (linhaA.subgrupoNome ?? '').localeCompare(linhaB.subgrupoNome ?? '', 'pt-BR', { sensitivity: 'base' });
     }
 
     if (coluna === 'total') {

@@ -135,17 +135,17 @@
               <caption>Necessidades consolidadas por local de compra</caption>
               <thead>
                 <tr>
-                  <th scope="col">Local</th>
-                  <th scope="col">Fornecedor</th>
-                  <th scope="col">Item</th>
-                  <th scope="col">Grupo</th>
-                  <th scope="col">Lojas</th>
-                  <th scope="col" class="number-column">Total</th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('organizacao', 'local')"><button type="button" class="sort-button" (click)="ordenarTabela('organizacao', 'local')">Local <span>{{ indicadorOrdenacao('organizacao', 'local') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('organizacao', 'fornecedor')"><button type="button" class="sort-button" (click)="ordenarTabela('organizacao', 'fornecedor')">Fornecedor <span>{{ indicadorOrdenacao('organizacao', 'fornecedor') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('organizacao', 'item')"><button type="button" class="sort-button" (click)="ordenarTabela('organizacao', 'item')">Item <span>{{ indicadorOrdenacao('organizacao', 'item') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('organizacao', 'grupo')"><button type="button" class="sort-button" (click)="ordenarTabela('organizacao', 'grupo')">Grupo <span>{{ indicadorOrdenacao('organizacao', 'grupo') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('organizacao', 'lojas')"><button type="button" class="sort-button" (click)="ordenarTabela('organizacao', 'lojas')">Lojas <span>{{ indicadorOrdenacao('organizacao', 'lojas') }}</span></button></th>
+                  <th scope="col" class="number-column" [attr.aria-sort]="ariaSort('organizacao', 'total')"><button type="button" class="sort-button sort-button--number" (click)="ordenarTabela('organizacao', 'total')">Total <span>{{ indicadorOrdenacao('organizacao', 'total') }}</span></button></th>
                   <th scope="col">Acao</th>
                 </tr>
               </thead>
               <tbody>
-                @for (linha of painel().organizacao; track trackConsolidado($index, linha)) {
+                @for (linha of organizacaoExibida(); track trackConsolidado($index, linha)) {
                   <tr>
                     <td>{{ linha.localCompraNome ?? '-' }}</td>
                     <td>{{ linha.fornecedorNome ?? '-' }}</td>
@@ -325,17 +325,17 @@
                 <thead>
                   <tr>
                     <th scope="col">Selecionar</th>
-                    <th scope="col">Loja</th>
-                    <th scope="col">Item</th>
-                    <th scope="col">Local</th>
-                    <th scope="col">Prioridade</th>
-                    <th scope="col" class="number-column">Qtd</th>
-                    <th scope="col">Status</th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('necessidades', 'loja')"><button type="button" class="sort-button" (click)="ordenarTabela('necessidades', 'loja')">Loja <span>{{ indicadorOrdenacao('necessidades', 'loja') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('necessidades', 'item')"><button type="button" class="sort-button" (click)="ordenarTabela('necessidades', 'item')">Item <span>{{ indicadorOrdenacao('necessidades', 'item') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('necessidades', 'local')"><button type="button" class="sort-button" (click)="ordenarTabela('necessidades', 'local')">Local <span>{{ indicadorOrdenacao('necessidades', 'local') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('necessidades', 'prioridade')"><button type="button" class="sort-button" (click)="ordenarTabela('necessidades', 'prioridade')">Prioridade <span>{{ indicadorOrdenacao('necessidades', 'prioridade') }}</span></button></th>
+                    <th scope="col" class="number-column" [attr.aria-sort]="ariaSort('necessidades', 'qtd')"><button type="button" class="sort-button sort-button--number" (click)="ordenarTabela('necessidades', 'qtd')">Qtd <span>{{ indicadorOrdenacao('necessidades', 'qtd') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('necessidades', 'status')"><button type="button" class="sort-button" (click)="ordenarTabela('necessidades', 'status')">Status <span>{{ indicadorOrdenacao('necessidades', 'status') }}</span></button></th>
                     <th scope="col">Acao</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (necessidade of painel().necessidades; track trackId($index, necessidade)) {
+                  @for (necessidade of necessidadesExibidas(); track trackId($index, necessidade)) {
                     <tr>
                       <td>
                         <input
@@ -449,17 +449,17 @@
                 <caption>Itens de compra</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Item</th>
-                    <th scope="col">Grupo</th>
-                    <th scope="col">Unidade</th>
-                    <th scope="col">Local</th>
-                    <th scope="col">Fornecedor</th>
-                    <th scope="col">Flags</th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('itens', 'item')"><button type="button" class="sort-button" (click)="ordenarTabela('itens', 'item')">Item <span>{{ indicadorOrdenacao('itens', 'item') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('itens', 'grupo')"><button type="button" class="sort-button" (click)="ordenarTabela('itens', 'grupo')">Grupo <span>{{ indicadorOrdenacao('itens', 'grupo') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('itens', 'unidade')"><button type="button" class="sort-button" (click)="ordenarTabela('itens', 'unidade')">Unidade <span>{{ indicadorOrdenacao('itens', 'unidade') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('itens', 'local')"><button type="button" class="sort-button" (click)="ordenarTabela('itens', 'local')">Local <span>{{ indicadorOrdenacao('itens', 'local') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('itens', 'fornecedor')"><button type="button" class="sort-button" (click)="ordenarTabela('itens', 'fornecedor')">Fornecedor <span>{{ indicadorOrdenacao('itens', 'fornecedor') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('itens', 'flags')"><button type="button" class="sort-button" (click)="ordenarTabela('itens', 'flags')">Flags <span>{{ indicadorOrdenacao('itens', 'flags') }}</span></button></th>
                     <th scope="col">Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (item of painel().itens; track trackId($index, item)) {
+                  @for (item of itensExibidos(); track trackId($index, item)) {
                     <tr>
                       <td class="description-cell">{{ item.descricao }}</td>
                       <td>{{ item.grupoNome }}</td>
@@ -507,14 +507,14 @@
                 <caption>Grupos de item de compra</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Grupo</th>
-                    <th scope="col">Descricao</th>
-                    <th scope="col">Status</th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('grupos', 'grupo')"><button type="button" class="sort-button" (click)="ordenarTabela('grupos', 'grupo')">Grupo <span>{{ indicadorOrdenacao('grupos', 'grupo') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('grupos', 'descricao')"><button type="button" class="sort-button" (click)="ordenarTabela('grupos', 'descricao')">Descricao <span>{{ indicadorOrdenacao('grupos', 'descricao') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('grupos', 'status')"><button type="button" class="sort-button" (click)="ordenarTabela('grupos', 'status')">Status <span>{{ indicadorOrdenacao('grupos', 'status') }}</span></button></th>
                     <th scope="col">Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (grupo of painel().grupos; track trackId($index, grupo)) {
+                  @for (grupo of gruposExibidos(); track trackId($index, grupo)) {
                     <tr>
                       <td>{{ grupo.nome }}</td>
                       <td class="description-cell">{{ grupo.descricao ?? '-' }}</td>
@@ -595,15 +595,15 @@
                 <caption>Locais de compra</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Local</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">Fornecedor</th>
-                    <th scope="col">Observacoes</th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('locais', 'local')"><button type="button" class="sort-button" (click)="ordenarTabela('locais', 'local')">Local <span>{{ indicadorOrdenacao('locais', 'local') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('locais', 'tipo')"><button type="button" class="sort-button" (click)="ordenarTabela('locais', 'tipo')">Tipo <span>{{ indicadorOrdenacao('locais', 'tipo') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('locais', 'fornecedor')"><button type="button" class="sort-button" (click)="ordenarTabela('locais', 'fornecedor')">Fornecedor <span>{{ indicadorOrdenacao('locais', 'fornecedor') }}</span></button></th>
+                    <th scope="col" [attr.aria-sort]="ariaSort('locais', 'observacoes')"><button type="button" class="sort-button" (click)="ordenarTabela('locais', 'observacoes')">Observacoes <span>{{ indicadorOrdenacao('locais', 'observacoes') }}</span></button></th>
                     <th scope="col">Acoes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (local of painel().locais; track trackId($index, local)) {
+                  @for (local of locaisExibidos(); track trackId($index, local)) {
                     <tr>
                       <td>{{ local.nome }}</td>
                       <td>{{ nomeTipoLocal(local.tipo) }}</td>
@@ -628,17 +628,17 @@
               <caption>Historico de compras</caption>
               <thead>
                 <tr>
-                  <th scope="col">Data</th>
-                  <th scope="col">Item</th>
-                  <th scope="col">Fornecedor</th>
-                  <th scope="col">Pedido</th>
-                  <th scope="col" class="number-column">Qtd</th>
-                  <th scope="col" class="number-column">Unitario</th>
-                  <th scope="col" class="number-column">Total</th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('historico', 'data')"><button type="button" class="sort-button" (click)="ordenarTabela('historico', 'data')">Data <span>{{ indicadorOrdenacao('historico', 'data') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('historico', 'item')"><button type="button" class="sort-button" (click)="ordenarTabela('historico', 'item')">Item <span>{{ indicadorOrdenacao('historico', 'item') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('historico', 'fornecedor')"><button type="button" class="sort-button" (click)="ordenarTabela('historico', 'fornecedor')">Fornecedor <span>{{ indicadorOrdenacao('historico', 'fornecedor') }}</span></button></th>
+                  <th scope="col" [attr.aria-sort]="ariaSort('historico', 'pedido')"><button type="button" class="sort-button" (click)="ordenarTabela('historico', 'pedido')">Pedido <span>{{ indicadorOrdenacao('historico', 'pedido') }}</span></button></th>
+                  <th scope="col" class="number-column" [attr.aria-sort]="ariaSort('historico', 'qtd')"><button type="button" class="sort-button sort-button--number" (click)="ordenarTabela('historico', 'qtd')">Qtd <span>{{ indicadorOrdenacao('historico', 'qtd') }}</span></button></th>
+                  <th scope="col" class="number-column" [attr.aria-sort]="ariaSort('historico', 'unitario')"><button type="button" class="sort-button sort-button--number" (click)="ordenarTabela('historico', 'unitario')">Unitario <span>{{ indicadorOrdenacao('historico', 'unitario') }}</span></button></th>
+                  <th scope="col" class="number-column" [attr.aria-sort]="ariaSort('historico', 'total')"><button type="button" class="sort-button sort-button--number" (click)="ordenarTabela('historico', 'total')">Total <span>{{ indicadorOrdenacao('historico', 'total') }}</span></button></th>
                 </tr>
               </thead>
               <tbody>
-                @for (historico of painel().historico; track historico.pedidoId + '-' + historico.itemCompraId) {
+                @for (historico of historicoExibido(); track historico.pedidoId + '-' + historico.itemCompraId) {
                   <tr>
                     <td>{{ formatarData(historico.dataCompra ?? historico.dataFechamento) }}</td>
                     <td class="description-cell">{{ historico.itemDescricao }}</td>

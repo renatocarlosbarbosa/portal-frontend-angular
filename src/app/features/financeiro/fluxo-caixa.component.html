@@ -65,18 +65,42 @@
           </caption>
           <thead>
             <tr>
-              <th scope="col" class="date-column">Data</th>
-              <th scope="col" class="money-column">Entradas</th>
-              <th scope="col" class="money-column">Saidas</th>
-              <th scope="col" class="money-column">Saldo</th>
-              <th scope="col" class="money-column">Acumulado</th>
+              <th scope="col" class="date-column" [attr.aria-sort]="ariaSort('data')">
+                <button type="button" class="sort-button" (click)="ordenarPor('data')">
+                  Data <span>{{ indicadorOrdenacao('data') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('entradas')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('entradas')">
+                  Entradas <span>{{ indicadorOrdenacao('entradas') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('saidas')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('saidas')">
+                  Saidas <span>{{ indicadorOrdenacao('saidas') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('saldo')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('saldo')">
+                  Saldo <span>{{ indicadorOrdenacao('saldo') }}</span>
+                </button>
+              </th>
+              <th scope="col" class="money-column" [attr.aria-sort]="ariaSort('saldoAcumulado')">
+                <button type="button" class="sort-button sort-button--number" (click)="ordenarPor('saldoAcumulado')">
+                  Acumulado <span>{{ indicadorOrdenacao('saldoAcumulado') }}</span>
+                </button>
+              </th>
               @for (loja of resumo().lojas; track loja) {
-                <th scope="col" class="money-column">{{ loja }}</th>
+                <th scope="col" class="money-column" [attr.aria-sort]="ariaSort(colunaLoja(loja))">
+                  <button type="button" class="sort-button sort-button--number" (click)="ordenarPor(colunaLoja(loja))">
+                    {{ loja }} <span>{{ indicadorOrdenacao(colunaLoja(loja)) }}</span>
+                  </button>
+                </th>
               }
             </tr>
           </thead>
           <tbody>
-            @for (linha of resumo().linhas; track linha.dataMovimento) {
+            @for (linha of linhasOrdenadas(); track linha.dataMovimento) {
               <tr>
                 <th scope="row" class="date-column">{{ linha.dataLabel }}</th>
                 <td class="money-column">{{ formatarMoeda(linha.entradas) }}</td>

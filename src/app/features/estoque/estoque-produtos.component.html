@@ -65,8 +65,18 @@
                   <span aria-hidden="true">{{ indicadorOrdenacao('produto') }}</span>
                 </button>
               </th>
-              <th scope="col">EAN</th>
-              <th scope="col">Subgrupo</th>
+              <th scope="col" [attr.aria-sort]="ariaSort('ean')">
+                <button type="button" class="sort-button" (click)="ordenarPorEan()">
+                  EAN
+                  <span aria-hidden="true">{{ indicadorOrdenacao('ean') }}</span>
+                </button>
+              </th>
+              <th scope="col" [attr.aria-sort]="ariaSort('subgrupo')">
+                <button type="button" class="sort-button" (click)="ordenarPorSubgrupo()">
+                  Subgrupo
+                  <span aria-hidden="true">{{ indicadorOrdenacao('subgrupo') }}</span>
+                </button>
+              </th>
               @for (loja of matriz().lojas; track loja) {
                 <th scope="col" class="quantity-column" [attr.aria-sort]="ariaSort(colunaLoja(loja))">
                   <button type="button" class="sort-button sort-button--number" (click)="ordenarPorLoja(loja)">

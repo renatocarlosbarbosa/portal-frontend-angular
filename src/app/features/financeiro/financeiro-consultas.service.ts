@@ -5,12 +5,15 @@ import { Observable, forkJoin, of } from 'rxjs';
 import {
   AtualizarClassificacaoExtratoLoteRequest,
   AtualizarClassificacaoExtratoRequest,
+  CategoriaFinanceira,
   ConciliacaoCartaoOrigem,
   ConciliacaoExtratoOrigem,
   ContaFinanceiraOrigem,
+  ExtratoBancarioRateio,
   FinanceiroConsultasPainel,
   FluxoCaixaOrigemDiario,
   IndicadorFinanceiro,
+  SalvarRateioExtratoRequest,
   TipoLancamentoBancario,
 } from './financeiro-consultas';
 
@@ -101,6 +104,16 @@ export class FinanceiroConsultasService {
     );
   }
 
+  listarCategoriasFinanceiras(filtros: {
+    tipo?: string | null;
+    somenteAtivas?: boolean;
+  } = {}): Observable<readonly CategoriaFinanceira[]> {
+    return this.httpClient.get<readonly CategoriaFinanceira[]>(
+      `${this.baseUrl}/categorias-financeiras`,
+      { params: this.criarParams({ somenteAtivas: true, ...filtros }) },
+    );
+  }
+
   atualizarClassificacaoExtrato(
     request: AtualizarClassificacaoExtratoRequest,
   ): Observable<ConciliacaoExtratoOrigem | null> {
@@ -116,6 +129,28 @@ export class FinanceiroConsultasService {
     return this.httpClient.put<readonly ConciliacaoExtratoOrigem[]>(
       `${this.baseUrl}/extrato-origem/classificacao/lote`,
       request,
+    );
+  }
+
+  listarRateiosExtrato(
+    origemChave: string,
+    origemTabela = 'conciliacao.extrato_bancario',
+  ): Observable<readonly ExtratoBancarioRateio[]> {
+    return this.httpClient.get<readonly ExtratoBancarioRateio[]>(
+      `${this.baseUrl}/extrato-origem/${origemChave}/rateios`,
+      { params: this.criarParams({ origemTabela }) },
+    );
+  }
+
+  salvarRateiosExtrato(
+    origemChave: string,
+    request: SalvarRateioExtratoRequest,
+    origemTabela = 'conciliacao.extrato_bancario',
+  ): Observable<readonly ExtratoBancarioRateio[]> {
+    return this.httpClient.put<readonly ExtratoBancarioRateio[]>(
+      `${this.baseUrl}/extrato-origem/${origemChave}/rateios`,
+      request,
+      { params: this.criarParams({ origemTabela }) },
     );
   }
 

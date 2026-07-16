@@ -3,6 +3,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, finalize, of, tap } from 'rxjs';
 
 import { VendasDashboardService } from './vendas-dashboard.service';
+import { DiaResumoVendas, LojaResumoDiario } from './vendas-resumo-diario';
+
+type DirecaoOrdenacao = 'asc' | 'desc';
+type OrdenacaoDashboard = {
+  readonly coluna: string;
+  readonly direcao: DirecaoOrdenacao;
+};
 
 @Component({
   selector: 'app-dashboard',
@@ -15,6 +22,10 @@ export class DashboardComponent {
 
   protected readonly carregando = signal(true);
   protected readonly erroCarregamento = signal(false);
+  protected readonly ordenacao = signal<OrdenacaoDashboard>({
+    coluna: 'sap_loja',
+    direcao: 'asc',
+  });
   protected readonly resumoPorDia = toSignal(
     this.vendasDashboardService.listarResumoPorDia().pipe(
       tap(() => this.erroCarregamento.set(false)),
@@ -46,6 +57,12 @@ export class DashboardComponent {
   protected readonly todosExpandidos = computed(
     () => this.resumoPorDia().length > 0 && this.diasExpandidos().size === this.resumoPorDia().length,
   );
+  protected readonly resumoOrdenado = computed(() =>
+    this.resumoPorDia().map((dia) => ({
+      ...dia,
+      lojas: this.ordenarLojas(dia),
+    })),
+  );
 
   protected alternarDia(data: string): void {
     this.diasExpandidos.update((diasAtuais) => {
@@ -72,5 +89,60 @@ export class DashboardComponent {
     }
 
     this.diasExpandidos.set(new Set(this.resumoPorDia().map((dia) => dia.data)));
+  }
+
+  protected ordenarPor(coluna: string): void {
+    this.ordenacao.update((ordenacaoAtual) => ({
+      coluna,
+      direcao: ordenacaoAtual.coluna === coluna ? (ordenacaoAtual.direcao === 'asc' ? 'desc' : 'asc') : 'asc',
+    }));
+  }
+
+  protected indicadorOrdenacao(coluna: string): string {
+    const ordenacao = this.ordenacao();
+
+    if (ordenacao.coluna !== coluna) {
+      return '-';
+    }
+
+    return ordenacao.direcao === 'asc' ? '^' : 'v';
+  }
+
+  protected ariaSort(coluna: string): 'ascending' | 'descending' | 'none' {
+    const ordenacao = this.ordenacao();
+
+    if (ordenacao.coluna !== coluna) {
+      return 'none';
+    }
+
+    return ordenacao.direcao === 'asc' ? 'ascending' : 'descending';
+  }
+
+  private ordenarLojas(dia: DiaResumoVendas): readonly LojaResumoDiario[] {
+    const ordenacao = this.ordenacao();
+
+    return dia.lojas.slice().sort((lojaA, lojaB) => {
+      const comparacao = this.compararLojas(lojaA, lojaB, ordenacao.coluna);
+      return ordenacao.direcao === 'asc' ? comparacao : comparacao * -1;
+    });
+  }
+
+  private compararLojas(lojaA: LojaResumoDiario, lojaB: LojaResumoDiario, coluna: string): number {
+    if (coluna === 'sap_loja') {
+      return lojaA.sapLoja.localeCompare(lojaB.sapLoja, 'pt-BR', { numeric: true });
+    }
+
+    return this.valorIndicador(lojaA, coluna) - this.valorIndicador(lojaB, coluna);
+  }
+
+  private valorIndicador(loja: LojaResumoDiario, coluna: string): number {
+    const valor = loja.indicadores.find((indicador) => indicador.label === coluna)?.value ?? '0';
+    const normalizado = valor
+      .replace(/[^\d,.-]/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    const numero = Number(normalizado);
+
+    return Number.isFinite(numero) ? numero : 0;
   }
 }

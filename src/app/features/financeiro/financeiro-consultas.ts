@@ -58,6 +58,37 @@ export interface TipoLancamentoBancario {
   readonly ativo: boolean;
 }
 
+export interface CategoriaFinanceira {
+  readonly id: number;
+  readonly codigo: string | null;
+  readonly nome: string;
+  readonly tipo: 'RECEITA' | 'DESPESA' | string;
+  readonly dreLinha: string | null;
+  readonly ativa: boolean;
+}
+
+export interface ExtratoBancarioRateio {
+  readonly id: number | null;
+  readonly idExtratoBancario: number | null;
+  readonly categoriaFinanceiraId: number;
+  readonly categoriaFinanceiraNome: string | null;
+  readonly descricao: string | null;
+  readonly valor: number;
+  readonly observacao: string | null;
+}
+
+export interface SalvarRateioExtratoItemRequest {
+  readonly categoriaFinanceiraId: number;
+  readonly descricao?: string | null;
+  readonly valor: number;
+  readonly observacao?: string | null;
+}
+
+export interface SalvarRateioExtratoRequest {
+  readonly usuario?: string | null;
+  readonly itens: readonly SalvarRateioExtratoItemRequest[];
+}
+
 export interface AtualizarClassificacaoExtratoRequest {
   readonly origemTabela: string;
   readonly origemChave: string;

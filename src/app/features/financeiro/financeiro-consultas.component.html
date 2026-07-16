@@ -95,17 +95,45 @@
               <caption>Fluxo de caixa por origem</caption>
               <thead>
                 <tr>
-                  <th scope="col">Data</th>
-                  <th scope="col">Loja</th>
-                  <th scope="col">Tipo</th>
-                  <th scope="col" class="money-column">Entradas</th>
-                  <th scope="col" class="money-column">Saidas</th>
-                  <th scope="col" class="money-column">Saldo</th>
-                  <th scope="col" class="money-column">Acumulado</th>
+                  <th scope="col" [attr.aria-sort]="ariaSortFluxo('data')">
+                    <button type="button" class="sort-button" (click)="ordenarFluxoPor('data')">
+                      Data <span>{{ indicadorOrdenacaoFluxo('data') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortFluxo('loja')">
+                    <button type="button" class="sort-button" (click)="ordenarFluxoPor('loja')">
+                      Loja <span>{{ indicadorOrdenacaoFluxo('loja') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortFluxo('tipo')">
+                    <button type="button" class="sort-button" (click)="ordenarFluxoPor('tipo')">
+                      Tipo <span>{{ indicadorOrdenacaoFluxo('tipo') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortFluxo('entradas')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarFluxoPor('entradas')">
+                      Entradas <span>{{ indicadorOrdenacaoFluxo('entradas') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortFluxo('saidas')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarFluxoPor('saidas')">
+                      Saidas <span>{{ indicadorOrdenacaoFluxo('saidas') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortFluxo('saldo')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarFluxoPor('saldo')">
+                      Saldo <span>{{ indicadorOrdenacaoFluxo('saldo') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortFluxo('acumulado')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarFluxoPor('acumulado')">
+                      Acumulado <span>{{ indicadorOrdenacaoFluxo('acumulado') }}</span>
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                @for (linha of painel().fluxo; track trackFluxo($index, linha)) {
+                @for (linha of fluxoExibido(); track trackFluxo($index, linha)) {
                   <tr>
                     <td>{{ formatarData(linha.dataEvento) }}</td>
                     <td>{{ linha.sapLoja ?? '-' }}</td>
@@ -135,17 +163,45 @@
               <caption>Contas financeiras originadas no CISS</caption>
               <thead>
                 <tr>
-                  <th scope="col">Vencimento</th>
-                  <th scope="col">Tipo</th>
-                  <th scope="col">Loja</th>
-                  <th scope="col">Forma</th>
-                  <th scope="col">Cartao</th>
-                  <th scope="col" class="money-column">Valor</th>
-                  <th scope="col">Origem</th>
+                  <th scope="col" [attr.aria-sort]="ariaSortContas('vencimento')">
+                    <button type="button" class="sort-button" (click)="ordenarContasPor('vencimento')">
+                      Vencimento <span>{{ indicadorOrdenacaoContas('vencimento') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortContas('tipo')">
+                    <button type="button" class="sort-button" (click)="ordenarContasPor('tipo')">
+                      Tipo <span>{{ indicadorOrdenacaoContas('tipo') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortContas('loja')">
+                    <button type="button" class="sort-button" (click)="ordenarContasPor('loja')">
+                      Loja <span>{{ indicadorOrdenacaoContas('loja') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortContas('forma')">
+                    <button type="button" class="sort-button" (click)="ordenarContasPor('forma')">
+                      Forma <span>{{ indicadorOrdenacaoContas('forma') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortContas('cartao')">
+                    <button type="button" class="sort-button" (click)="ordenarContasPor('cartao')">
+                      Cartao <span>{{ indicadorOrdenacaoContas('cartao') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortContas('valor')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarContasPor('valor')">
+                      Valor <span>{{ indicadorOrdenacaoContas('valor') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortContas('origem')">
+                    <button type="button" class="sort-button" (click)="ordenarContasPor('origem')">
+                      Origem <span>{{ indicadorOrdenacaoContas('origem') }}</span>
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                @for (conta of painel().contas; track trackOrigem($index, conta)) {
+                @for (conta of contasExibidas(); track trackOrigem($index, conta)) {
                   <tr>
                     <td>{{ formatarData(conta.dataVencimento) }}</td>
                     <td><span class="pill">{{ conta.tipoTitulo }}</span></td>
@@ -169,6 +225,19 @@
           @if (mensagemClassificacao()) {
             <p class="inline-feedback" role="status">{{ mensagemClassificacao() }}</p>
           }
+          <div class="extrato-tools" aria-label="Busca no extrato bancario">
+            <label class="history-search" for="bank-history-search">
+              <span>Buscar historico</span>
+              <input
+                id="bank-history-search"
+                type="search"
+                [formControl]="filtroHistoricoExtrato"
+                placeholder="Texto do historico do lancamento"
+                autocomplete="off"
+              />
+            </label>
+            <button type="button" class="secondary-action" (click)="limparBuscaHistoricoExtrato()">Limpar busca</button>
+          </div>
           <div class="bulk-actions" aria-label="Classificacao em lote">
             <span>{{ quantidadeExtratosSelecionados() }} selecionado(s)</span>
             <select
@@ -204,13 +273,42 @@
                       aria-label="Selecionar todos os lancamentos exibidos"
                     />
                   </th>
-                  <th scope="col">Data</th>
-                  <th scope="col">Loja</th>
-                  <th scope="col">Banco</th>
-                  <th scope="col">Conta</th>
-                  <th scope="col">Historico</th>
-                  <th scope="col">Tipo receita/despesa</th>
-                  <th scope="col" class="money-column">Valor</th>
+                  <th scope="col" [attr.aria-sort]="ariaSortExtrato('data')">
+                    <button type="button" class="sort-button" (click)="ordenarExtratoPor('data')">
+                      Data <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('data') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortExtrato('loja')">
+                    <button type="button" class="sort-button" (click)="ordenarExtratoPor('loja')">
+                      Loja <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('loja') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortExtrato('banco')">
+                    <button type="button" class="sort-button" (click)="ordenarExtratoPor('banco')">
+                      Banco <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('banco') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortExtrato('conta')">
+                    <button type="button" class="sort-button" (click)="ordenarExtratoPor('conta')">
+                      Conta <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('conta') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortExtrato('historico')">
+                    <button type="button" class="sort-button" (click)="ordenarExtratoPor('historico')">
+                      Historico <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('historico') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortExtrato('tipo')">
+                    <button type="button" class="sort-button" (click)="ordenarExtratoPor('tipo')">
+                      Tipo receita/despesa <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('tipo') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortExtrato('valor')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarExtratoPor('valor')">
+                      Valor <span aria-hidden="true">{{ indicadorOrdenacaoExtrato('valor') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="action-column">Acoes</th>
                 </tr>
               </thead>
               <tbody>
@@ -255,10 +353,21 @@
                     <td class="money-column" [class]="tipoValorClasse(extrato.valorTransacao)">
                       {{ formatarMoeda(extrato.valorTransacao) }}
                     </td>
+                    <td class="action-column">
+                      <button
+                        type="button"
+                        class="icon-action"
+                        (click)="abrirRateioExtrato(extrato)"
+                        [attr.aria-label]="'Ratear lancamento ' + extrato.origemChave"
+                        title="Ratear lancamento"
+                      >
+                        %
+                      </button>
+                    </td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="8" class="empty-cell">Nenhum extrato encontrado no periodo.</td>
+                    <td colspan="9" class="empty-cell">Nenhum extrato encontrado no periodo.</td>
                   </tr>
                 }
               </tbody>
@@ -272,19 +381,55 @@
               <caption>Vendas e recebimentos de cartao</caption>
               <thead>
                 <tr>
-                  <th scope="col">Venda</th>
-                  <th scope="col">Fonte</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Modalidade</th>
-                  <th scope="col">Bandeira</th>
-                  <th scope="col">NSU</th>
-                  <th scope="col" class="money-column">Bruto</th>
-                  <th scope="col" class="money-column">Taxa</th>
-                  <th scope="col" class="money-column">Liquido</th>
+                  <th scope="col" [attr.aria-sort]="ariaSortCartoes('venda')">
+                    <button type="button" class="sort-button" (click)="ordenarCartoesPor('venda')">
+                      Venda <span>{{ indicadorOrdenacaoCartoes('venda') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortCartoes('fonte')">
+                    <button type="button" class="sort-button" (click)="ordenarCartoesPor('fonte')">
+                      Fonte <span>{{ indicadorOrdenacaoCartoes('fonte') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortCartoes('status')">
+                    <button type="button" class="sort-button" (click)="ordenarCartoesPor('status')">
+                      Status <span>{{ indicadorOrdenacaoCartoes('status') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortCartoes('modalidade')">
+                    <button type="button" class="sort-button" (click)="ordenarCartoesPor('modalidade')">
+                      Modalidade <span>{{ indicadorOrdenacaoCartoes('modalidade') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortCartoes('bandeira')">
+                    <button type="button" class="sort-button" (click)="ordenarCartoesPor('bandeira')">
+                      Bandeira <span>{{ indicadorOrdenacaoCartoes('bandeira') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" [attr.aria-sort]="ariaSortCartoes('nsu')">
+                    <button type="button" class="sort-button" (click)="ordenarCartoesPor('nsu')">
+                      NSU <span>{{ indicadorOrdenacaoCartoes('nsu') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortCartoes('bruto')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarCartoesPor('bruto')">
+                      Bruto <span>{{ indicadorOrdenacaoCartoes('bruto') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortCartoes('taxa')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarCartoesPor('taxa')">
+                      Taxa <span>{{ indicadorOrdenacaoCartoes('taxa') }}</span>
+                    </button>
+                  </th>
+                  <th scope="col" class="money-column" [attr.aria-sort]="ariaSortCartoes('liquido')">
+                    <button type="button" class="sort-button sort-button--number" (click)="ordenarCartoesPor('liquido')">
+                      Liquido <span>{{ indicadorOrdenacaoCartoes('liquido') }}</span>
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                @for (cartao of painel().cartoes; track trackOrigem($index, cartao)) {
+                @for (cartao of cartoesExibidos(); track trackOrigem($index, cartao)) {
                   <tr>
                     <td>{{ formatarData(cartao.dataVenda) }}</td>
                     <td class="origin-cell">{{ nomeFonte(cartao.origemTabela) }}</td>
@@ -308,4 +453,101 @@
       }
     }
   </section>
+
+  @if (extratoRateio(); as extrato) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharRateioExtrato()"></div>
+    <section
+      class="rateio-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rateio-title"
+    >
+      <header class="rateio-modal__header">
+        <div>
+          <span class="eyebrow">Rateio gerencial</span>
+          <h2 id="rateio-title">Ratear lancamento bancario</h2>
+          <p>{{ extrato.historicoTransacao ?? 'Lancamento sem historico' }}</p>
+        </div>
+        <button type="button" class="icon-action" (click)="fecharRateioExtrato()" aria-label="Fechar rateio">x</button>
+      </header>
+
+      <div class="rateio-summary">
+        <span>Desembolso: <strong>{{ formatarMoeda(extrato.valorTransacao) }}</strong></span>
+        <span>Rateado: <strong>{{ formatarMoeda(totalRateio()) }}</strong></span>
+        <span>
+          Saldo:
+          <strong [class]="rateioFechado() ? 'value--positive' : 'value--negative'">
+            {{ formatarMoeda(saldoRateio()) }}
+          </strong>
+        </span>
+      </div>
+
+      @if (carregandoRateio()) {
+        <p class="state-message">Carregando rateio...</p>
+      } @else {
+        @if (mensagemRateio()) {
+          <p class="inline-feedback" role="status">{{ mensagemRateio() }}</p>
+        }
+
+        <div class="rateio-lines">
+          @for (linha of rateiosEdicao(); track $index) {
+            <div class="rateio-line">
+              <label>
+                <span>Categoria</span>
+                <select
+                  [value]="linha.categoriaFinanceiraId"
+                  (change)="atualizarLinhaRateio($index, 'categoriaFinanceiraId', $event)"
+                >
+                  <option value="">Selecionar</option>
+                  @for (categoria of categoriasDespesaOrdenadas(); track trackCategoria($index, categoria)) {
+                    <option [value]="categoria.id">{{ categoria.nome }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Descricao</span>
+                <input
+                  type="text"
+                  [value]="linha.descricao"
+                  (input)="atualizarLinhaRateio($index, 'descricao', $event)"
+                  placeholder="Opcional"
+                />
+              </label>
+              <label>
+                <span>Valor</span>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  [value]="linha.valor"
+                  (input)="atualizarLinhaRateio($index, 'valor', $event)"
+                />
+              </label>
+              <button
+                type="button"
+                class="icon-action"
+                (click)="removerLinhaRateio($index)"
+                [disabled]="rateiosEdicao().length === 1"
+                aria-label="Remover linha de rateio"
+              >
+                -
+              </button>
+            </div>
+          }
+        </div>
+
+        <footer class="rateio-actions">
+          <button type="button" class="secondary-action" (click)="adicionarLinhaRateio()">Adicionar linha</button>
+          <button type="button" class="secondary-action" (click)="fecharRateioExtrato()">Fechar</button>
+          <button
+            type="button"
+            class="primary-action"
+            [disabled]="!rateioFechado() || salvandoRateio()"
+            (click)="salvarRateioExtrato()"
+          >
+            Salvar rateio
+          </button>
+        </footer>
+      }
+    </section>
+  }
 </section>

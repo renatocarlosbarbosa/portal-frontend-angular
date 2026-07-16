@@ -25,6 +25,31 @@ type AbaCompras =
   | 'grupos'
   | 'locais'
   | 'historico';
+type DirecaoOrdenacao = 'asc' | 'desc';
+type ColunaOrdenacaoCompras =
+  | 'local'
+  | 'fornecedor'
+  | 'item'
+  | 'grupo'
+  | 'lojas'
+  | 'total'
+  | 'loja'
+  | 'prioridade'
+  | 'qtd'
+  | 'status'
+  | 'unidade'
+  | 'flags'
+  | 'descricao'
+  | 'tipo'
+  | 'observacoes'
+  | 'data'
+  | 'pedido'
+  | 'unitario';
+type ChaveTabelaCompras = 'organizacao' | 'necessidades' | 'itens' | 'grupos' | 'locais' | 'historico';
+type OrdenacaoCompras = {
+  readonly coluna: ColunaOrdenacaoCompras;
+  readonly direcao: DirecaoOrdenacao;
+};
 
 @Component({
   selector: 'app-compras',
@@ -68,6 +93,14 @@ export class ComprasComponent {
   protected readonly grupoEmEdicao = signal<GrupoItemCompra | null>(null);
   protected readonly localEmEdicao = signal<LocalCompra | null>(null);
   protected readonly itemEmEdicao = signal<ItemCompra | null>(null);
+  protected readonly ordenacoes = signal<Record<ChaveTabelaCompras, OrdenacaoCompras>>({
+    organizacao: { coluna: 'local', direcao: 'asc' },
+    necessidades: { coluna: 'loja', direcao: 'asc' },
+    itens: { coluna: 'item', direcao: 'asc' },
+    grupos: { coluna: 'grupo', direcao: 'asc' },
+    locais: { coluna: 'local', direcao: 'asc' },
+    historico: { coluna: 'data', direcao: 'desc' },
+  });
 
   protected readonly filtros = this.formBuilder.nonNullable.group({
     sapLoja: [''],
@@ -131,6 +164,118 @@ export class ComprasComponent {
   );
   protected readonly itensCompradosPedido = computed(() =>
     this.pedidoSelecionado()?.itens.filter((item) => item.status === 'COMPRADO').length ?? 0,
+  );
+  protected readonly organizacaoExibida = computed(() =>
+    this.ordenarLista(this.painel().organizacao, 'organizacao', (item, coluna) => {
+      switch (coluna) {
+        case 'local':
+          return item.localCompraNome;
+        case 'fornecedor':
+          return item.fornecedorNome;
+        case 'item':
+          return item.itemDescricao;
+        case 'grupo':
+          return item.grupoNome;
+        case 'lojas':
+          return item.lojas;
+        case 'total':
+          return item.quantidadeTotal;
+        default:
+          return '';
+      }
+    }),
+  );
+  protected readonly necessidadesExibidas = computed(() =>
+    this.ordenarLista(this.painel().necessidades, 'necessidades', (item, coluna) => {
+      switch (coluna) {
+        case 'loja':
+          return item.sapLoja;
+        case 'item':
+          return item.itemDescricao;
+        case 'local':
+          return item.localCompraNome;
+        case 'prioridade':
+          return this.ordemPrioridade(item.prioridade);
+        case 'qtd':
+          return item.quantidadeNecessaria;
+        case 'status':
+          return item.status;
+        default:
+          return '';
+      }
+    }),
+  );
+  protected readonly itensExibidos = computed(() =>
+    this.ordenarLista(this.painel().itens, 'itens', (item, coluna) => {
+      switch (coluna) {
+        case 'item':
+          return item.descricao;
+        case 'grupo':
+          return item.grupoNome;
+        case 'unidade':
+          return item.unidadeSigla;
+        case 'local':
+          return item.localCompraPadraoNome;
+        case 'fornecedor':
+          return item.fornecedorPadraoNome;
+        case 'flags':
+          return `${item.recorrente ? 'Recorrente' : 'Eventual'} ${item.homologado ? 'Homologado' : 'Livre'}`;
+        default:
+          return '';
+      }
+    }),
+  );
+  protected readonly gruposExibidos = computed(() =>
+    this.ordenarLista(this.painel().grupos, 'grupos', (item, coluna) => {
+      switch (coluna) {
+        case 'grupo':
+          return item.nome;
+        case 'descricao':
+          return item.descricao;
+        case 'status':
+          return item.ativo ? 'Ativo' : 'Inativo';
+        default:
+          return '';
+      }
+    }),
+  );
+  protected readonly locaisExibidos = computed(() =>
+    this.ordenarLista(this.painel().locais, 'locais', (item, coluna) => {
+      switch (coluna) {
+        case 'local':
+          return item.nome;
+        case 'tipo':
+          return this.nomeTipoLocal(item.tipo);
+        case 'fornecedor':
+          return item.fornecedorNome;
+        case 'observacoes':
+          return item.observacoes;
+        default:
+          return '';
+      }
+    }),
+  );
+  protected readonly historicoExibido = computed(() =>
+    this.ordenarLista(this.painel().historico, 'historico', (item, coluna) => {
+      switch (coluna) {
+        case 'data':
+          return item.dataCompra ?? item.dataFechamento;
+        case 'item':
+          return item.itemDescricao;
+        case 'fornecedor':
+          return item.fornecedorNome;
+        case 'pedido':
+          return item.numeroInterno;
+        case 'qtd':
+          return item.quantidadeComprada;
+        case 'unitario':
+          return item.valorUnitario;
+        case 'total':
+          return item.valorTotal;
+        default:
+          return '';
+      }
+    }),
   );
 
   constructor() {
@@ -561,6 +706,40 @@ export class ComprasComponent {
     return `${item.localCompraId ?? 'sem-local'}-${item.itemCompraId}`;
   }
 
+  protected ordenarTabela(tabela: ChaveTabelaCompras, coluna: ColunaOrdenacaoCompras): void {
+    this.ordenacoes.update((ordenacoes) => {
+      const atual = ordenacoes[tabela];
+
+      return {
+        ...ordenacoes,
+        [tabela]: {
+          coluna,
+          direcao: atual.coluna === coluna ? (atual.direcao === 'asc' ? 'desc' : 'asc') : this.direcaoInicial(coluna),
+        },
+      };
+    });
+  }
+
+  protected indicadorOrdenacao(tabela: ChaveTabelaCompras, coluna: ColunaOrdenacaoCompras): string {
+    const ordenacao = this.ordenacoes()[tabela];
+
+    if (ordenacao.coluna !== coluna) {
+      return '-';
+    }
+
+    return ordenacao.direcao === 'asc' ? '^' : 'v';
+  }
+
+  protected ariaSort(tabela: ChaveTabelaCompras, coluna: ColunaOrdenacaoCompras): 'ascending' | 'descending' | 'none' {
+    const ordenacao = this.ordenacoes()[tabela];
+
+    if (ordenacao.coluna !== coluna) {
+      return 'none';
+    }
+
+    return ordenacao.direcao === 'asc' ? 'ascending' : 'descending';
+  }
+
   private executarSalvamento<T>(
     observable: Observable<T>,
     mensagem: string,
@@ -625,6 +804,38 @@ export class ComprasComponent {
       return 0;
     }
     return Number(String(valor).replace(',', '.'));
+  }
+
+  private ordenarLista<T>(
+    itens: readonly T[],
+    tabela: ChaveTabelaCompras,
+    valor: (item: T, coluna: ColunaOrdenacaoCompras) => string | number | null | undefined,
+  ): readonly T[] {
+    const ordenacao = this.ordenacoes()[tabela];
+
+    return itens.slice().sort((itemA, itemB) => {
+      const comparacao = this.compararValores(valor(itemA, ordenacao.coluna), valor(itemB, ordenacao.coluna));
+      return ordenacao.direcao === 'asc' ? comparacao : comparacao * -1;
+    });
+  }
+
+  private compararValores(valorA: string | number | null | undefined, valorB: string | number | null | undefined): number {
+    if (typeof valorA === 'number' || typeof valorB === 'number') {
+      return Number(valorA ?? 0) - Number(valorB ?? 0);
+    }
+
+    return (valorA ?? '').localeCompare(valorB ?? '', 'pt-BR', {
+      numeric: true,
+      sensitivity: 'base',
+    });
+  }
+
+  private direcaoInicial(coluna: ColunaOrdenacaoCompras): DirecaoOrdenacao {
+    return ['data', 'total', 'qtd', 'unitario'].includes(coluna) ? 'desc' : 'asc';
+  }
+
+  private ordemPrioridade(prioridade: string): number {
+    return this.prioridades.indexOf(prioridade);
   }
 
   private obterDataHoje(): string {

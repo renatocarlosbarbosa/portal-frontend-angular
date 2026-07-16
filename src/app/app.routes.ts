@@ -29,6 +29,14 @@ export const routes: Routes = [
         title: 'Dashboard | Portal Grupo A2R2',
       },
       {
+        path: 'vendas/produtos',
+        loadComponent: () =>
+          import('./features/vendas/vendas-produtos.component').then(
+            (m) => m.VendasProdutosComponent,
+          ),
+        title: 'Vendas por Produto | Portal Grupo A2R2',
+      },
+      {
         path: 'estoque',
         loadComponent: () =>
           import('./features/estoque/estoque-produtos.component').then(
